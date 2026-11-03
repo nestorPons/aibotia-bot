@@ -18,7 +18,14 @@
 - `go build ./...` y `go vet ./...` OK.
 - `go test ./...` OK (el test SSE `TestEventsStreamEnvíaEventos` es sensible a
   tiempos; pasa al reintentar en aislamiento).
-- Despliegue en `93.127.203.142` con `deploy/deploy.sh` y `/ready` OK.
+- Despliegue en `93.127.203.142` con `deploy/deploy.sh` (rsync + rebuild):
+  commit `da92843`, migraciones aplicadas hasta la versión 8.
+- `https://aibotia.com/health` → `{"status":"ok"}`.
+- `https://aibotia.com/ready` → postgres/redis `ok`.
+- Landing 200, `/admin` 303 (login), `www` → apex 308.
+- Informes de prueba sincronizados en `data/test/reports/` del servidor.
+- WhatsApp en producción queda en `waiting_qr`: requiere vincular el número
+  desde el panel (`/admin`) escaneando el QR.
 
 ### Archivos
 - `.gitignore`, `docs/CHANGELOG.md`.

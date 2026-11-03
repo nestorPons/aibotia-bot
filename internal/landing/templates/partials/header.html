@@ -1,0 +1,32 @@
+{{define "header"}}
+<header class="site-header" data-header>
+  <div class="container header-inner">
+    <a class="brand" href="/" aria-label="AIBOT · inicio">
+      <img class="brand-logo" src="/static/img/logo.webp" alt="" width="44" height="44">
+      <span class="brand-text">
+        <strong>AIBOT</strong>
+        <small>Chatbot para WhatsApp</small>
+      </span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" data-nav-toggle>
+      <span class="sr-only">Abrir menú</span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+
+    <nav id="primary-nav" class="primary-nav" aria-label="Navegación principal">
+      <a class="nav-link" href="/#que-es">Qué es</a>
+      <a class="nav-link" href="/#planes">Planes</a>
+      <a class="nav-link" href="/#ventajas">Ventajas</a>
+      <a class="nav-link" href="/#sistema">El sistema</a>
+      <a class="nav-link" href="/#contacto">Contacto</a>
+      <div class="nav-actions">
+        <a class="btn btn-ghost btn-sm" href="{{.Site.WhatsAppURL}}" target="_blank" rel="noopener">Probar ahora</a>
+        <a class="btn btn-primary btn-sm" href="#contacto">Hablemos</a>
+      </div>
+    </nav>
+  </div>
+</header>
+{{end}}

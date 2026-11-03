@@ -1,0 +1,24 @@
+# syntax=docker/dockerfile:1
+
+FROM golang:1.27-alpine
+
+WORKDIR /src
+
+ENV CGO_ENABLED=0 \
+    GOTOOLCHAIN=local \
+    PROMPTS_DIR=/src/data/seeds/prompts \
+    DATA_DIR=/src/data/seeds
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN go build ./...
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=10s --timeout=3s --start-period=300s --retries=12 \
+    CMD wget -q -O- http://127.0.0.1:3000/health >/dev/null 2>&1 || exit 1
+
+CMD ["sh", "-c", "go build -o /tmp/botd ./cmd/botd && exec /tmp/botd"]

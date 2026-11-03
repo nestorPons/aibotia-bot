@@ -1,0 +1,29 @@
+# Binarios
+/bin/
+*.exe
+
+# Entorno y secretos
+.env
+.env.*
+!.env.example
+
+# Datos locales (se versionan seeds, catálogos y casos de prueba)
+/data/*
+!/data/*.json
+!/data/seeds/
+!/data/test/
+# Informes de pruebas: contienen teléfonos y datos de sesión
+/data/test/reports/
+/data/test/.last-case
+*.sqlite
+
+# Editor/OS
+.vscode/
+.idea/
+.DS_Store
+
+# Cobertura
+coverage.out
+
+# Legacy (Node/MariaDB): no versionar
+/.old/

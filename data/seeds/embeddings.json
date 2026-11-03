@@ -1,0 +1,170 @@
+[
+    {
+        "name": "Información sobre cursos y formaciones del Studio Tamara Freitas",
+        "keywords": "cursos, formación, clases, aprender, clases, certificado, inscripción, kit, experiencia",
+        "additional_content": "Detalles sobre los cursos ofrecidos por el Studio Tamara Freitas: duración, modalidad, contenido incluido, requisitos, precio, fechas disponibles y proceso de inscripción.",
+        "code": "prompt_courses_info",
+        "context_notes": "Responde a preguntas como: '¿ofrecéis cursos?', '¿cuánto duran?', '¿son presenciales?', '¿necesito experiencia?', '¿qué incluye?', '¿dais certificado?', '¿puedo apuntarme?'."
+    },
+    {
+        "name": "Dirección, ubicación y contacto del Studio Tamara Freitas",
+        "keywords": "dirección, ubicación, localización, lugar, cómo llegar, mapa, parking, acceso, timbre, ascensor, estudio Valencia",
+        "additional_content": "Dirección exacta, cómo llegar al Studio, puntos de referencia y datos de contacto actualizados.",
+        "code": "prompt_location_contact",
+        "context_notes": "Responde a '¿dónde estáis?', '¿cómo llegar?', '¿hay parking?', '¿qué horario tenéis?'."
+    },
+    {
+        "name": "Dermapen para cejas - Estimulación del crecimiento",
+        "keywords": "dermapen cejas, crecimiento cejas, microagujas, factores crecimiento, alopecia cejas",
+        "additional_content": "Describe el tratamiento Dermapen para cejas, beneficios, sesiones y precio.",
+        "code": "prompt_dermapen",
+        "context_notes": "Responde a '¿qué es Dermapen?', '¿sirve para alopecia en cejas?'"
+    },
+    {
+        "name": "Servicios de cejas - Nanopigmentación",
+        "keywords": "servicios cejas, micro cejas, nanopigmentación",
+        "additional_content": "Lista de técnicas para cejas, beneficios",
+        "code": "prompt_eyebrow_services",
+        "context_notes": "Responde a ¿qué servicios hay para cejas?"
+    },
+    {
+        "name": "Corrección con láser - Eliminación de micropigmentación y tatuajes",
+        "keywords": "corrección láser, eliminación micropigmentación, eliminación tatoo, láser Q-Switched, microneedling",
+        "additional_content": "Este tema responde a clientas interesadas en quitar/corregir tatuajes o micropigmentaciones/micro anteriores mediante la tecnología láser.",
+        "code": "prompt_laser_correction",
+        "context_notes": "Solo debe activarse si el usuario expresa intención de eliminar algo, no si desea hacerse una micro nueva."
+    },
+    {
+        "name": "Ubicación del Studio - Dirección y acceso",
+        "keywords": "dirección, ubicación, acceso, cómo llegar, timbre, ascensor, Valencia",
+        "additional_content": "Indica cómo acceder al Studio con dirección y referencia clara.",
+        "code": "prompt_location",
+        "context_notes": "Responde a '¿dónde estáis?', '¿cómo llego?', '¿qué timbre tocar?'."
+    },
+    {
+        "name": "Micropigmentación capilar - Simulación de densidad en cuero cabelludo",
+        "keywords": "micropigmentación capilar, calvo, densidad cabello, alopecia, cicatrices, valoración previa, micro, micropigmentación, micro capilar, prueba alérgica",
+        "additional_content": "Explica el tratamiento para cuero cabelludo, sesiones y resultados naturales.",
+        "code": "prompt_micro_capilar",
+        "context_notes": "Responde a ¿qué es micropigmentación capilar?, ¿sirve para cicatrices?"
+    },
+    {
+        "name": "Nanopigmentación de cejas - Diseño y corrección",
+        "keywords": "nanopigmentación cejas, alopecia, huecos, calvas, nanoblading, shading,  micro, micropigmentación, micro cejas, prueba alérgica",
+        "additional_content": "Explica técnicas, beneficios, duración, precios y cuidados posteriores.",
+        "code": "prompt_nano_brow",
+        "context_notes": "Responde a '¿qué es la nanopigmentación de cejas?'"
+    },
+    {
+        "name": "Nanopigmentación de ojos - Eyeliner semipermanente",
+        "keywords": "nanopigmentación ojos, eyeliner semipermanente, fine line, shading,  micro, micropigmentación, micro ojos, prueba alérgica",
+        "additional_content": "Describe estilos de eyeliner, duración, precios y cuidados.",
+        "code": "prompt_nano_eyes",
+        "context_notes": ""
+    },
+    {
+        "name": "Nanopigmentación de labios - Corrección y rejuvenecimiento labial",
+        "keywords": "hialurónico, bótox, nanopigmentación labios, lip tint, pinta labios, cuidados labios,  micro, micropigmentación, micro labios, prueba alérgica",
+        "additional_content": "Explica técnicas, beneficios, precios y cuidados pre/post tratamiento.",
+        "code": "prompt_nano_lips",
+        "context_notes": "Responde a '¿qué es nanopigmentación labial?'"
+    },
+    {
+        "name": "Servicios y precios - Studio Tamara Freitas",
+        "keywords": "servicios, precios, valoración gratuita",
+        "additional_content": "Lista completa de servicios con precios actualizados.",
+        "code": "prompt_services_list",
+        "context_notes": "Responde a '¿qué servicios ofrecéis?', '¿cuánto cuestan?', '¿hay valoración gratuita?'."
+    },
+    {
+        "name": "Higiene facial - glow up",
+        "keywords": "limpieza facial profunda, eliminar impurezas, puntos negros, exceso de grasa, células muertas, piel suave, piel uniforme, imperfecciones, absorción cosméticos, piel luminosa, piel fresca, piel revitalizada, quemaduras solares, infecciones activas, alergia productos, acné severo, protector solar, evitar maquillaje",
+        "additional_content": "Explica los pasos de una limpieza facial, tipos de exfoliación y tratamientos recomendados.",
+        "code": "prompt_glow_up",
+        "context_notes": "Responde a '¿qué es la higiene facial?', '¿cómo se realiza una limpieza facial?'."
+    },
+    {
+        "name": "Revitalización facial",
+        "keywords": "revitalización facial, hidratación profunda, regeneración celular, textura piel, rostro uniforme, rostro radiante, antioxidantes, vitaminas, elasticidad, firmeza, piel rejuvenecida, piel luminosa, herpes activo, procesos inflamatorios, alergia productos, piel sensible, patologías cutáneas, evitar sol, protector solar, evitar piscinas",
+        "additional_content": "Describe el tratamiento de revitalización facial, beneficios y cuidados posteriores.",
+        "code": "prompt_revitalage",
+        "context_notes": "Responde a '¿qué es la revitalización facial?', '¿cuáles son los beneficios?'."
+    },
+    {
+        "name": "Peeling facial",
+        "keywords": "facial, peeling, exfoliación, renovación celular, luminosidad, cuidado piel",
+        "additional_content": "Explica el proceso de un peeling facial, tipos y beneficios para la piel.",
+        "code": "prompt_peeling",
+        "context_notes": "Responde a '¿qué es un peeling facial?', '¿cuáles son los beneficios?'."
+    },
+    {
+        "name": "Dermapen facial",
+        "keywords": "dermapen facial, micropunción, microcanales piel, colágeno, elastina, rejuvenecimiento, líneas de expresión, cicatrices, absorción de activos, firmeza, textura uniforme, piel luminosa, heridas abiertas, acné activo, cáncer de piel, infecciones, diabetes, trastornos coagulación, evitar sol, protector solar, evitar maquillaje",
+        "additional_content": "Describe el tratamiento con Dermapen, beneficios y cuidados posteriores.",
+        "code": "prompt_dermapen_face",
+        "context_notes": "Responde a '¿qué es Dermapen facial?', '¿cuáles son los beneficios?'."
+    },
+    {
+        "name": "Drenaje linfático facial",
+        "keywords": "drenaje linfático facial, microcirculación, masaje suave, circulación, líquidos retenidos, hinchazón, bolsas, oxigenación piel, aspecto descansado, piel luminosa, piel fresca, rostro desinflamado, ojeras, infecciones piel, heridas abiertas, herpes activo, cáncer no tratado, problemas linfáticos graves, hipertensión no controlada, problemas tiroides, piel limpia, sin maquillaje, hidratación, maquillaje ligero",
+        "additional_content": "Explica el proceso de drenaje linfático facial, beneficios y sensaciones que proporciona.",
+        "code": "prompt_linfatic_face",
+        "context_notes": "Responde a '¿qué es el drenaje linfático facial?', '¿cuáles son los beneficios?'."
+    },
+    {
+        "name": "Crio Full Face",
+        "keywords": "full face dinámico, crio, tratamiento facial, frío controlado, revitaliza piel, circulación, firmeza, elasticidad, textura piel, lifting natural, reduce inflamación, rojeces, bolsas, colágeno, elastina, contorno facial, piel luminosa, piel tersa, rejuvenecida, contraindicaciones, herpes activo, heridas abiertas, quemaduras solares, rosácea grave, enfermedades cutáneas severas, sensibilidad vascular, piel limpia, sin maquillaje, hidratación, evitar sol",
+        "additional_content": "Explica el proceso de Crio Full Face, beneficios y sensaciones que proporciona.",
+        "code": "prompt_crio_full_face",
+        "context_notes": "Responde a '¿qué es Crio Full Face?', '¿cuáles son los beneficios?'."
+    },
+    {
+        "name": "Masaje Sliim Redux",
+        "keywords": "masaje, drenaje, reducción, firmeza, tonificación, bienestar",
+        "additional_content": "Describe masaje reductor .",
+        "code": "prompt_massage_sliim",
+        "context_notes": "Responde a '¿qué es un masaje reductor?', '¿cuáles son los beneficios?'."
+    },
+    {
+        "name": "Detox",
+        "keywords": "detox corporal, eliminar toxinas, retención de líquidos, circulación, cuerpo ligero, revitalizado, exfoliación, envoltura, masaje desintoxicante, piel suave, pérdida de peso, bienestar, piel renovada, contraindicaciones, heridas, infecciones, fiebre, insuficiencia renal, insuficiencia hepática, embarazo, hipertensión, alimentación sana, evitar sol, beber agua, sauna",
+        "additional_content": "Describe el tratamiento corporal, beneficios y sensaciones que proporciona.",
+        "code": "prompt_detox",
+        "context_notes": "Responde a '¿qué es un tratamiento corporal detox?', '¿cuáles son los beneficios?'."
+    },
+    {
+        "name": "Celulitis cero",
+        "keywords": "celulitis cero, celulitis, piel de naranja, frío controlado, circulación, drenaje, reafirma piel, nódulos de grasa, textura piel, suavidad, bienestar general, piel lisa, piel firme, piel uniforme, contraindicaciones, heridas recientes, infecciones cutáneas, enfermedades graves de la piel, problemas de coagulación, hipertensión, sensibilidad vascular, alimentación sana, evitar sol, hidratación, movilidad ligera",
+        "additional_content": "Describe el masaje anticelulítico, beneficios y sensaciones que proporciona.",
+        "code": "prompt_massage_anticell",
+        "context_notes": "Responde a '¿qué es un masaje anticelulítico?', '¿cuáles son los beneficios?'."
+    },
+    {
+        "name": "Lipedema",
+        "keywords": "lipedema, circulación, pesadez en las piernas, eliminación de grasa, inflamación, bienestar general, masaje, aparatología, crio de placas, dolor, movilidad, piel, piernas ligeras, estética de piernas, contraindicaciones, infecciones, heridas, inflamación aguda, insuficiencia renal, insuficiencia hepática, embarazo, hipertensión, inversión, precio sesión, bono, alimentación sana, exposición al sol, hidratación, rutinas",
+        "additional_content": "Describe el tratamiento para lipedema, beneficios y sensaciones que proporciona.",
+        "code": "prompt_lipedema",
+        "context_notes": "Responde a '¿qué es un tratamiento para lipedema?', '¿cuáles son los beneficios?'."
+    },
+    {
+        "name": "Cavitación",
+        "keywords": "cavitación, ultrasonidos, grasa localizada, reducción, tonificación, bienestar",
+        "additional_content": "Describe el tratamiento de cavitación, beneficios y sensaciones que proporciona.",
+        "code": "prompt_cavitation",
+        "context_notes": "Responde a '¿qué es la cavitación?', '¿cuáles son los beneficios?'."
+    },
+    {
+        "name": "Masaje relajante",
+        "keywords": "masaje relajante, aliviar tensiones, reducir estrés, equilibrio, bienestar, calma, masaje suave, liberar tensión, relaja músculos, circulación, cuerpo relajado, mente tranquila, inflamación aguda, fiebre, enfermedades graves, problemas cardíacos, presión arterial, ropa cómoda, hidratarse, descansar",
+        "additional_content": "Describe el masaje relajante, beneficios y sensaciones que proporciona.",
+        "code": "prompt_massage_relax",
+        "context_notes": "Responde a '¿qué es un masaje relajante?', '¿cuáles son los beneficios?'."
+    },
+    {
+        "name": "Depilación Láser Diodo - Packs y zonas individuales",
+        "keywords": "láser diodo, depilación láser, packs mujer, packs hombre, zonas mini, zonas pequeñas, zonas medias, zonas combinadas, zonas sueltas, zonas grandes",
+        "additional_content": "Información sobre depilación láser diodo para hombres y mujeres, incluyendo packs y precios por zonas.",
+        "code": "prompt_laser_diodo",
+        "context_notes": "Responde a '¿tenéis depilación láser?', '¿qué packs hay para mujer?', '¿cuánto cuesta el láser?'."
+    }
+]

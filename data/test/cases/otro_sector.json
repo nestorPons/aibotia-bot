@@ -1,0 +1,34 @@
+{
+  "id": "otro_sector",
+  "name": "Consulta de otro sector",
+  "persona": "Persona despistada que escribe al número equivocado o cree que el studio ofrece servicios que no existen.",
+  "goal": "Comprobar hasta dónde llega el bot: debe reconocer lo que no hace y no inventar servicios.",
+  "tone": "amable, algo confundido",
+  "setup": [],
+  "openers": [
+    "Hola, ¿hacéis limpieza dental?",
+    "Buenas, quería pedir cita para cortarle el pelo a mi perro"
+  ],
+  "questions": [
+    "¿Me podéis empastar una muela?",
+    "¿Cuánto cuesta la revisión de un fontanero?",
+    "Necesito un abogado para una herencia, ¿lleváis eso?",
+    "¿Hacéis análisis de sangre?",
+    "¿Y clases de conducir?",
+    "¿Reparáis ordenadores?",
+    "Entonces, ¿solo estética?",
+    "¿Podéis recomendarme un dentista de la zona?",
+    "¿Y hacéis depilación con cera normal?",
+    "Vale, ¿y qué es lo que sí hacéis?"
+  ],
+  "turns": { "min": 6, "max": 9 },
+  "must": [
+    "aclarar con claridad qué servicios ofrece el studio",
+    "no inventar servicios ni precios de otros sectores"
+  ],
+  "must_not": [
+    "aceptar un servicio que no existe",
+    "inventar profesionales o especialidades"
+  ],
+  "finish": "Reconducir a los servicios reales o cerrar amablemente."
+}

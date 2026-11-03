@@ -1,0 +1,34 @@
+{
+  "id": "clienta_habitual",
+  "name": "Clienta habitual",
+  "persona": "Mujer de 38 años, clienta desde hace dos años. Conoce el studio y los servicios, tutea y escribe con confianza mensajes cortos.",
+  "goal": "Retomar el contacto, recordar su última visita y pedir hora para un repaso.",
+  "tone": "cercano, informal, mensajes cortos",
+  "setup": [
+    "Hola! Soy Marta, vengo de hace un mes de la micropigmentación de cejas",
+    "Me quedé encantada, quería saber cuándo puedo volver para el repaso"
+  ],
+  "openers": [
+    "Hola de nuevo! Ya me toca el repaso de cejas, ¿cómo lo hago?"
+  ],
+  "questions": [
+    "¿Te acuerdas de lo que me hice la última vez?",
+    "¿El repaso tiene coste?",
+    "¿Cuánto tiempo tiene que pasar desde la sesión?",
+    "¿Me lo puede hacer Tamara otra vez?",
+    "¿Tengo que seguir los mismos cuidados?",
+    "¿Me mandas la dirección otra vez que no la encuentro?",
+    "¿Puedo cambiar la hora si me surge algo?",
+    "Vale, pues dime hueco la semana que viene"
+  ],
+  "turns": { "min": 5, "max": 8 },
+  "must": [
+    "usar el contexto previo de la conversación",
+    "no volver a pedir datos que la clienta ya dio"
+  ],
+  "must_not": [
+    "tratarla como clienta nueva",
+    "inventar su historial o su cita"
+  ],
+  "finish": "Cerrar con un siguiente paso claro (cita o repaso)."
+}

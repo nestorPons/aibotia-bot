@@ -1,0 +1,34 @@
+{
+  "id": "cliente_casual",
+  "name": "Cliente casual",
+  "persona": "Hombre de 29 años que ha visto el studio en Instagram. No tiene una necesidad concreta, pregunta sin compromiso y se distrae con facilidad.",
+  "goal": "Explorar qué le puede interesar sin decidirse, comparar opciones y desaparecer si se agobia.",
+  "tone": "informal, mensajes muy cortos, a veces una sola palabra",
+  "setup": [],
+  "openers": [
+    "buenas, vi lo de las cejas en insta",
+    "hola, una pregunta rápida"
+  ],
+  "questions": [
+    "cuánto cuesta más o menos?",
+    "y eso cuánto dura?",
+    "duele?",
+    "mmm y para hombre queda bien?",
+    "vale y si no me gusta?",
+    "trabajáis los sábados?",
+    "cuánto se tarda en curar?",
+    "es que tengo una boda en 3 semanas",
+    "y lo del láser qué es exactamente?",
+    "bueno lo pienso y os digo"
+  ],
+  "turns": { "min": 6, "max": 10 },
+  "must": [
+    "responder de forma concreta y breve",
+    "guiar hacia un siguiente paso sin presionar"
+  ],
+  "must_not": [
+    "inventar precios o plazos",
+    "soltar un discurso largo"
+  ],
+  "finish": "Dejar la puerta abierta sin insistir."
+}

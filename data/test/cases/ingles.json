@@ -1,0 +1,34 @@
+{
+  "id": "ingles",
+  "name": "Cliente en inglés",
+  "persona": "Turista inglesa que escribe en inglés y espera respuesta en inglés. No conoce los términos en español.",
+  "goal": "Resolver dudas básicas (precio, ubicación, cita) en inglés sin perder exactitud.",
+  "tone": "amable, directo, mensajes cortos en inglés",
+  "setup": [],
+  "openers": [
+    "Hi! Do you do eyebrow microblading?",
+    "Hello, I am visiting Valencia next week, do you have availability?"
+  ],
+  "questions": [
+    "How much is it?",
+    "How long does it take?",
+    "Where are you exactly?",
+    "Can I book for next Tuesday morning?",
+    "Do you speak English in the studio?",
+    "How should I take care of it afterwards?",
+    "Is it painful?",
+    "Can I pay by card?",
+    "What is your cancellation policy?",
+    "Thanks, that helps a lot"
+  ],
+  "turns": { "min": 6, "max": 10 },
+  "must": [
+    "responder en inglés",
+    "mantener la dirección y los nombres propios sin traducir"
+  ],
+  "must_not": [
+    "responder en español",
+    "inventar precios o disponibilidad"
+  ],
+  "finish": "Confirmar el siguiente paso en inglés."
+}

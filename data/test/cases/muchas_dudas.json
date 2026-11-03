@@ -1,0 +1,39 @@
+{
+  "id": "muchas_dudas",
+  "name": "Cliente con muchas dudas",
+  "persona": "Mujer de 36 años que se está informando a fondo antes de decidirse. Pregunta por detalles técnicos, contraindicaciones, garantías y políticas.",
+  "goal": "Resolver todas sus dudas y comprobar si la información es coherente entre respuestas.",
+  "tone": "educado, metódico, pregunta una cosa detrás de otra",
+  "setup": [],
+  "openers": [
+    "Hola, tengo varias dudas antes de decidirme por la micropigmentación",
+    "Buenas, estoy comparando y quiero entender bien el proceso"
+  ],
+  "questions": [
+    "¿Quién realiza el tratamiento y qué titulación tiene?",
+    "¿Qué productos y pigmentos utilizáis?",
+    "¿Cuánto dura el resultado y cuándo hace falta repaso?",
+    "¿El repaso está incluido en el precio?",
+    "¿Qué contraindicaciones tiene?",
+    "¿Se puede hacer en el embarazo o la lactancia?",
+    "¿Duele? ¿Qué anestésico usáis?",
+    "¿Qué cuidados hay antes y después?",
+    "¿Qué pasa si no me gusta el resultado?",
+    "¿Hay garantía o política de retoque?",
+    "¿Cómo se cancela o cambia una cita?",
+    "¿Qué formas de pago aceptáis?",
+    "¿Atendéis a menores con autorización?",
+    "¿El precio que me diste incluye todo?",
+    "¿Puedo ver trabajos anteriores?"
+  ],
+  "turns": { "min": 12, "max": 18 },
+  "must": [
+    "responder de forma concreta y sin contradicciones",
+    "usar el catálogo de servicios y los datos de empresa"
+  ],
+  "must_not": [
+    "inventar titulaciones, garantías o contraindicaciones",
+    "contradecir una respuesta anterior"
+  ],
+  "finish": "Resumir los puntos clave y proponer cita o contacto con el equipo."
+}

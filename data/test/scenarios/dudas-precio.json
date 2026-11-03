@@ -1,0 +1,15 @@
+{
+  "name": "cliente que duda y compara precios",
+  "persona": "Mujer de 41 años de Valencia, compara precios entre centros, pregunta por promociones y quiere asegurarse de que el tratamiento merece la pena. Es educada pero exigente; pide detalles y confirmación.",
+  "opener": "Buenas, estoy mirando varios sitios para hacerme micropigmentación de labios.",
+  "questions": [
+    "¿Por qué es tan caro comparado con otros sitios?",
+    "¿El resultado es natural? Me da miedo que quede muy marcado.",
+    "¿Cuánto tiempo aguanta el color antes de necesitar un repaso?",
+    "¿El repaso está incluido en el precio?",
+    "¿Quién realiza el tratamiento, Tamara o el equipo?",
+    "¿Podría ver fotos de trabajos anteriores?",
+    "¿Qué pasa si no me gusta el resultado?",
+    "Vale, ¿y si reservo hoy tengo algún descuento?"
+  ]
+}

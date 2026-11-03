@@ -1,0 +1,52 @@
+{{define "footer"}}
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <a class="brand brand-light" href="/" aria-label="AIBOT · inicio">
+        <img class="brand-logo" src="/static/img/logo.webp" alt="" width="44" height="44">
+        <span class="brand-text">
+          <strong>AIBOT</strong>
+          <small>Chatbot para WhatsApp</small>
+        </span>
+      </a>
+      <p>{{.Site.Tagline}}. Un sistema propio, instalado en tu infraestructura y adaptado a tu negocio.</p>
+      <a class="btn btn-accent btn-sm" href="{{.Site.WhatsAppURL}}" target="_blank" rel="noopener">Probar AIBOT</a>
+    </div>
+
+    <div>
+      <h4>Producto</h4>
+      <ul class="footer-links">
+        <li><a href="/#que-es">Qué es AIBOT</a></li>
+        <li><a href="/#planes">Planes y precios</a></li>
+        <li><a href="/#ventajas">Ventajas</a></li>
+        <li><a href="/#sistema">El sistema</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h4>Contacto</h4>
+      <ul class="footer-links">
+        <li><a href="mailto:{{.Site.Email}}">{{.Site.Email}}</a></li>
+        <li><a href="{{tel .Site.Phone}}">{{.Site.Phone}}</a></li>
+        <li><a href="{{.Site.WhatsAppURL}}" target="_blank" rel="noopener">Grupo de WhatsApp</a></li>
+        <li><a href="https://maps.app.goo.gl/BKWKsA7SGpoQuSQo6" target="_blank" rel="noopener">{{.Site.Location}}</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h4>Recursos</h4>
+      <ul class="footer-links">
+        <li><a href="{{.Site.GitHub}}" target="_blank" rel="noopener">Proyecto en GitHub</a></li>
+        <li><a href="{{.Site.Web}}" target="_blank" rel="noopener">nestorpons.com</a></li>
+        <li><a href="https://openai.com/es-ES/api/pricing/" target="_blank" rel="noopener">Precios API OpenAI</a></li>
+        <li><a href="/#contacto">Solicitar información</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container footer-bottom">
+    <p>© {{.Year}} {{.Site.Name}} · {{.Site.LegalNote}}</p>
+    <p>Hecho con Go y htmx · Datos alojados en tu infraestructura</p>
+  </div>
+</footer>
+{{end}}

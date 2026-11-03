@@ -1,0 +1,557 @@
+[
+    {
+        "id": "nano_tf_cejas",
+        "category": "Nanopigmentación Tamara Freitas",
+        "name": "Cejas (Tamara)",
+        "description": "Micropigmentación de cejas pelo a pelo con efecto natural realizada por Tamara Freitas. Incluye diseño previo, anestesia tópica y revisión de retoque a las 4-6 semanas.",
+        "price": 390,
+        "duration_min": 120,
+        "providers": [
+            "TF"
+        ]
+    },
+    {
+        "id": "nano_tf_ojos",
+        "category": "Nanopigmentación Tamara Freitas",
+        "name": "Ojos eyeliner (Tamara)",
+        "description": "Eyeliner permanente (superior o inferior) realizado por Tamara Freitas. Incluye diseño, anestesia tópica y revisión posterior.",
+        "price": 390,
+        "duration_min": 120,
+        "providers": [
+            "TF"
+        ]
+    },
+    {
+        "id": "nano_tf_labios",
+        "category": "Nanopigmentación Tamara Freitas",
+        "name": "Labios (Tamara)",
+        "description": "Micropigmentación de labios para definir contorno y aportar color. Incluye diseño, anestesia tópica y revisión posterior.",
+        "price": 390,
+        "duration_min": 120,
+        "providers": [
+            "TF"
+        ]
+    },
+    {
+        "id": "nano_eq_cejas",
+        "category": "Nanopigmentación",
+        "name": "Cejas Equipo",
+        "description": "Micropigmentación de cejas pelo a pelo realizada por el equipo de la clínica. Incluye diseño, anestesia tópica y revisión de retoque.",
+        "price": 280,
+        "duration_min": 120,
+        "providers": [
+            "LL"
+        ]
+    },
+    {
+        "id": "nano_eq_ojos",
+        "category": "Nanopigmentación",
+        "name": "Ojos eyeliner Equipo",
+        "description": "Eyeliner permanente realizado por el equipo. Incluye diseño, anestesia tópica y revisión.",
+        "price": 280,
+        "duration_min": 120,
+        "providers": [
+            "LL"
+        ]
+    },
+    {
+        "id": "nano_eq_labios",
+        "category": "Nanopigmentación",
+        "name": "Labios Equipo",
+        "description": "Micropigmentación de labios (contorno y color) realizada por el equipo. Incluye diseño, anestesia tópica y revisión.",
+        "price": 350,
+        "duration_min": 120,
+        "providers": [
+            "LL",
+            "TF"
+        ]
+    },
+    {
+        "id": "nano_rep_cons",
+        "category": "Nanopigmentación",
+        "name": "Precios a consultar",
+        "description": "Sesión de repaso de micropigmentación solicitada fuera del plazo habitual. Requiere valoración previa del trabajo existente.",
+        "price": 50,
+        "duration_min": 30,
+        "note": "Precio orientativo sujeto a confirmación",
+        "providers": [
+            "LL",
+            "TF"
+        ]
+    },
+    {
+        "id": "nano_rep_res",
+        "category": "Nanopigmentación",
+        "name": "Requieren de reserva",
+        "description": "Sesión de repaso de micropigmentación con reserva previa obligatoria. Sujeta a valoración del trabajo existente.",
+        "price": 60,
+        "duration_min": 45,
+        "note": "Requiere reserva previa",
+        "providers": [
+            "LL",
+            "TF"
+        ]
+    },
+    {
+        "id": "nano_prueba",
+        "category": "Nanopigmentación",
+        "name": "Prueba alérgica opcional",
+        "description": "Prueba alérgica opcional de pigmentos antes de la micropigmentación. Debe realizarse al menos 48 horas antes de la sesión.",
+        "price": 15,
+        "duration_min": 15,
+        "note": [
+            "Opcional.",
+            "Tiene que realizarse mínimo 48h antes."
+        ],
+        "providers": [
+            "LL",
+            "TF"
+        ]
+    },
+    {
+        "id": "ext_lab_anes",
+        "category": "Extras labios",
+        "name": "Anestesia médica opcional",
+        "description": "Refuerzo de anestesia médica tópica para sesiones de micropigmentación de labios más largas o sensibles.",
+        "price": 40,
+        "duration_min": 30,
+        "providers": [
+            "LL",
+            "TF"
+        ]
+    },
+    {
+        "id": "micro_cap_cons",
+        "category": "Micropigmentación capilar",
+        "name": "Precio a consultar",
+        "description": "Micropigmentación capilar para disimular calvicie o aportar densidad visual. Requiere valoración previa de la zona a tratar.",
+        "price": 300,
+        "duration_min": 180,
+        "note": "Precio orientativo sujeto a confirmación",
+        "providers": [
+            "TF",
+            "LL"
+        ]
+    },
+    {
+        "id": "rem_las_cejas",
+        "category": "Eliminación de micropigmentación o tatuajes con láser",
+        "name": "Láser Cejas DETOX SOS",
+        "description": "Eliminación con láser de micropigmentación antigua en cejas (protocolo DETOX SOS). Incluye valoración de la zona.",
+        "price": 70,
+        "duration_min": 30,
+        "providers": [
+            "LL",
+            "TF"
+        ]
+    },
+    {
+        "id": "rem_der_detox",
+        "category": "Eliminación de micropigmentación o tatuajes con láser",
+        "name": "Dermapen DETOX SOS",
+        "description": "Eliminación de micropigmentación con dermapen DETOX SOS. Alternativa no láser para pigmentos resistentes.",
+        "price": 70,
+        "duration_min": 45,
+        "providers": [
+            "LL",
+            "TF"
+        ]
+    },
+    {
+        "id": "rem_las_eye",
+        "category": "Eliminación de micropigmentación o tatuajes con láser",
+        "name": "Láser Eyeliner",
+        "description": "Eliminación con láser de eyeliner permanente antiguo. Se realiza con protección ocular.",
+        "price": 70,
+        "duration_min": 30,
+        "providers": [
+            "TF"
+        ]
+    },
+    {
+        "id": "rem_las_tatoo",
+        "category": "Eliminación de micropigmentación o tatuajes con láser",
+        "name": "A consultar",
+        "description": "Eliminación de tatuajes con láser. Requiere valoración previa y puede necesitar varias sesiones.",
+        "price": 90,
+        "duration_min": 45,
+        "note": "Precio orientativo sujeto a confirmación",
+        "providers": [
+            "LL",
+            "TF"
+        ]
+    },
+    {
+        "id": "fac_hig_90",
+        "category": "Estética Facial y Corporal",
+        "name": "Higiene facial",
+        "description": "Higiene facial profunda: limpieza, exfoliación, extracción de comedones, mascarilla y protección final.",
+        "price": 65,
+        "duration_min": 90,
+        "providers": [
+            "EM"
+        ]
+    },
+    {
+        "id": "fac_rev_90",
+        "category": "Estética Facial y Corporal",
+        "name": "Revitalización facial",
+        "description": "Revitalización facial con activos hidratantes y antioxidantes para devolver luminosidad y firmeza.",
+        "price": 65,
+        "duration_min": 90,
+        "providers": [
+            "EM"
+        ]
+    },
+    {
+        "id": "fac_pel_45",
+        "category": "Estética Facial y Corporal",
+        "name": "Peeling facial",
+        "description": "Peeling facial químico para renovar la piel, mejorar la textura y unificar el tono.",
+        "price": 65,
+        "duration_min": 45,
+        "providers": [
+            "EM"
+        ]
+    },
+    {
+        "id": "fac_derm_60",
+        "category": "Estética Facial y Corporal",
+        "name": "Dermapen facial microneedling",
+        "description": "Dermapen facial con microneedling para estimular el colágeno y mejorar poros y cicatrices. Puede requerir varias sesiones.",
+        "price": 100,
+        "duration_min": 60,
+        "providers": [
+            "EM"
+        ]
+    },
+    {
+        "id": "fac_dre_30",
+        "category": "Estética Facial y Corporal",
+        "name": "Drenaje facial",
+        "description": "Drenaje facial manual para reducir la retención de líquidos y mejorar el contorno del rostro.",
+        "price": 40,
+        "duration_min": 30,
+        "providers": [
+            "EM"
+        ]
+    },
+    {
+        "id": "fac_crio_full",
+        "category": "Estética Facial y Corporal",
+        "name": "Crio Full Face",
+        "description": "Protocolo completo de crioestimulación facial para tensar, oxigenar y aportar luminosidad. Sesión extensa con varias fases.",
+        "price": 350,
+        "duration_min": 240,
+        "providers": [
+            "EM"
+        ]
+    },
+    {
+        "id": "fac_rev_0",
+        "category": "Estética Facial y Corporal",
+        "name": "Revision estetica facial",
+        "description": "Revisión estética facial gratuita para valorar la piel y definir el tratamiento adecuado.",
+        "price": 0,
+        "duration_min": 30,
+        "providers": [
+            "EM"
+        ]
+    },
+    {
+        "id": "corp_dre_bra",
+        "category": "Estética Facial y Corporal",
+        "name": "Masaje Sliim Redux - Drenaje Brasileño",
+        "description": "Masaje Sliim Redux de drenaje brasileño para reducir la retención de líquidos y mejorar el contorno corporal.",
+        "price": 80,
+        "duration_min": 60,
+        "providers": [
+            "EM"
+        ]
+    },
+    {
+        "id": "corp_cel_cero",
+        "category": "Estética Facial y Corporal",
+        "name": "Celulitis Cero",
+        "description": "Protocolo intensivo anticelulitis con aparatología y masaje. Recomendado en ciclos de varias sesiones.",
+        "price": 350,
+        "duration_min": 180,
+        "providers": [
+            "EM"
+        ]
+    },
+    {
+        "id": "corp_detox_90",
+        "category": "Estética Facial y Corporal",
+        "name": "Detox corporal",
+        "description": "Tratamiento detox corporal para eliminar toxinas y activar la circulación. Incluye masaje y envoltura.",
+        "price": 100,
+        "duration_min": 90,
+        "providers": [
+            "EM"
+        ]
+    },
+    {
+        "id": "corp_relax_60",
+        "category": "Estética Facial y Corporal",
+        "name": "Masaje relajante",
+        "description": "Masaje relajante de cuerpo completo para aliviar la tensión muscular y el estrés.",
+        "price": 50,
+        "duration_min": 60,
+        "providers": [
+            "EM"
+        ]
+    },
+    {
+        "id": "corp_liped_180",
+        "category": "Estética Facial y Corporal",
+        "name": "Lipedema",
+        "description": "Tratamiento corporal específico para lipedema con drenaje linfático manual adaptado.",
+        "price": 350,
+        "duration_min": 180,
+        "providers": [
+            "EM"
+        ]
+    },
+    {
+        "id": "corp_cav_60",
+        "category": "Estética Facial y Corporal",
+        "name": "Cavitación",
+        "description": "Cavitación por ultrasonidos para reducir grasa localizada y mejorar la piel. Recomendada en ciclos.",
+        "price": 70,
+        "duration_min": 60,
+        "providers": [
+            "EM"
+        ]
+    },
+    {
+        "id": "corp_crio_din",
+        "category": "Estética Facial y Corporal",
+        "name": "Criodinámica",
+        "description": "Criodinámica (frío controlado) para reducir grasa localizada y activar la circulación.",
+        "price": 150,
+        "duration_min": 60,
+        "providers": [
+            "EM"
+        ]
+    },
+    {
+        "id": "corp_crio_esc",
+        "category": "Estética Facial y Corporal",
+        "name": "Crioescultura",
+        "description": "Crioescultura corporal con frío localizado para modelar zonas rebeldes. Requiere diagnóstico previo y varias sesiones.",
+        "price": 120,
+        "duration_min": 60,
+        "note": "Precio orientativo sujeto a confirmación",
+        "providers": [
+            "EM"
+        ]
+    },
+    {
+        "id": "las_w_bas",
+        "category": "Depilación Láser Diodo",
+        "name": "Pack Básico (Axilas + Ingles + Pubis + Labios + Perianal)",
+        "description": "Pack básico de depilación láser diodo para mujer: axilas, ingles, pubis, labios y perianal.",
+        "price": 45,
+        "duration_min": 30,
+        "providers": [
+            "LL"
+        ]
+    },
+    {
+        "id": "las_w_med",
+        "category": "Depilación Láser Diodo",
+        "name": "Pack Medio (Axilas + Ingles + Pubis + Labios + Perianal + Media pierna + Pies)",
+        "description": "Pack medio de láser diodo para mujer: básico más media pierna y pies.",
+        "price": 70,
+        "duration_min": 45,
+        "providers": [
+            "LL"
+        ]
+    },
+    {
+        "id": "las_w_com",
+        "category": "Depilación Láser Diodo",
+        "name": "Pack Completo (Axilas + Ingles + Pubis + Labios + Perianal + Pierna completa + Pies)",
+        "description": "Pack completo de láser diodo para mujer: básico más pierna completa y pies.",
+        "price": 80,
+        "duration_min": 60,
+        "providers": [
+            "LL"
+        ]
+    },
+    {
+        "id": "las_w_full",
+        "category": "Depilación Láser Diodo",
+        "name": "Cuerpo COMPLETO mujer",
+        "description": "Depilación láser diodo de cuerpo completo para mujer. Incluye todas las zonas del pack completo.",
+        "price": 99,
+        "duration_min": 90,
+        "providers": [
+            "LL"
+        ]
+    },
+    {
+        "id": "las_m_bas",
+        "category": "Depilación Láser Diodo",
+        "name": "Pack Básico (Pecho + Abdomen + Hombros)",
+        "description": "Pack básico de láser diodo para hombre: pecho, abdomen y hombros.",
+        "price": 60,
+        "duration_min": 30,
+        "providers": [
+            "LL"
+        ]
+    },
+    {
+        "id": "las_m_med",
+        "category": "Depilación Láser Diodo",
+        "name": "Pack Medio (Pecho + Abdomen + Hombros + Espalda + Nuca + Brazos + Axilas + Manos)",
+        "description": "Pack medio de láser diodo para hombre: básico más espalda, nuca, brazos, axilas y manos.",
+        "price": 99,
+        "duration_min": 60,
+        "providers": [
+            "LL"
+        ]
+    },
+    {
+        "id": "las_m_com",
+        "category": "Depilación Láser Diodo",
+        "name": "Pack Completo (Piernas + Pies + Axilas + Pecho + Abdomen + Hombros + Brazos + Manos)",
+        "description": "Pack completo de láser diodo para hombre: piernas, pies, axilas, pecho, abdomen, hombros, brazos y manos.",
+        "price": 105,
+        "duration_min": 75,
+        "providers": [
+            "LL"
+        ]
+    },
+    {
+        "id": "las_m_full",
+        "category": "Depilación Láser Diodo",
+        "name": "Cuerpo COMPLETO hombre",
+        "description": "Depilación láser diodo de cuerpo completo para hombre. Incluye todas las zonas del pack completo.",
+        "price": 125,
+        "duration_min": 90,
+        "providers": [
+            "LL"
+        ]
+    },
+    {
+        "id": "las_z_mini",
+        "category": "Depilación Láser Diodo",
+        "name": "ZONAS MINI",
+        "description": "Sesión de láser diodo en una zona mini (por ejemplo labio superior o dedos). Precio por zona.",
+        "price": 20,
+        "duration_min": 15,
+        "note": "por zona",
+        "providers": [
+            "LL"
+        ]
+    },
+    {
+        "id": "las_z_peq",
+        "category": "Depilación Láser Diodo",
+        "name": "ZONAS PEQUEÑAS",
+        "description": "Sesión de láser diodo en una zona pequeña (por ejemplo axilas o ingles). Precio por zona.",
+        "price": 25,
+        "duration_min": 20,
+        "note": "por zona",
+        "providers": [
+            "LL"
+        ]
+    },
+    {
+        "id": "las_z_med",
+        "category": "Depilación Láser Diodo",
+        "name": "ZONAS MEDIAS",
+        "description": "Sesión de láser diodo en una zona media (por ejemplo media pierna o antebrazo). Precio por zona.",
+        "price": 30,
+        "duration_min": 30,
+        "note": "por zona",
+        "providers": [
+            "LL"
+        ]
+    },
+    {
+        "id": "las_z_comb",
+        "category": "Depilación Láser Diodo",
+        "name": "ZONAS COMBINADAS",
+        "description": "Sesión de láser diodo en varias zonas combinadas. Precio por conjunto de zonas.",
+        "price": 40,
+        "duration_min": 45,
+        "note": "por zona",
+        "providers": [
+            "LL"
+        ]
+    },
+    {
+        "id": "las_z_suel",
+        "category": "Depilación Láser Diodo",
+        "name": "ZONAS SUELTAS",
+        "description": "Sesión de láser diodo en una zona suelta (por ejemplo pierna completa o espalda). Precio por zona.",
+        "price": 50,
+        "duration_min": 45,
+        "note": "por zona",
+        "providers": [
+            "LL"
+        ]
+    },
+    {
+        "id": "las_z_gran",
+        "category": "Depilación Láser Diodo",
+        "name": "ZONAS GRANDES",
+        "description": "Sesión de láser diodo en una zona grande (por ejemplo espalda completa y abdomen). Precio por zona.",
+        "price": 65,
+        "duration_min": 60,
+        "note": "por zona",
+        "providers": [
+            "LL"
+        ]
+    },
+    {
+        "id": "res_cita_micro",
+        "category": "Otros",
+        "name": "Reserva cita micro",
+        "description": "Reserva de cita de micropigmentación; el importe se descuenta del precio del servicio.",
+        "price": 50,
+        "duration_min": 30,
+        "providers": [
+            "LL",
+            "TF"
+        ]
+    },
+    {
+        "id": "eval_prim_vis",
+        "category": "Otros",
+        "name": "Primera visita de evaluación (Consultoría)",
+        "description": "Primera visita de evaluación gratuita para nuevos clientes de micropigmentación. Se valora el trabajo previo y se resuelven dudas.",
+        "price": 0,
+        "duration_min": 30,
+        "providers": [
+            "LL",
+            "TF"
+        ]
+    },
+    {
+        "id": "eval_vis_est",
+        "category": "Otros",
+        "name": "Primera visita estética corporal o facial",
+        "description": "Primera visita estética corporal o facial gratuita. Diagnóstico y propuesta de tratamiento.",
+        "price": 0,
+        "duration_min": 30,
+        "providers": [
+            "EM"
+        ]
+    },
+    {
+        "id": "mod_formacion",
+        "category": "Otros",
+        "name": "Modelos de formación",
+        "description": "Sesión como modelo para prácticas de formación del equipo. Precio reducido y condiciones específicas.",
+        "price": 50,
+        "duration_min": 60,
+        "providers": [
+            "LL",
+            "TF"
+        ]
+    }
+]

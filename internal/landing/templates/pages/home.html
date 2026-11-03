@@ -1,0 +1,190 @@
+{{define "content"}}
+<section class="hero" id="inicio">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="badge"><span class="dot"></span> Chatbot con IA para WhatsApp</span>
+      <h1>Automatiza tu atención al cliente <span class="text-accent">en WhatsApp</span></h1>
+      <p class="lede">Responde preguntas, agenda citas y envía recordatorios automáticamente. Un asistente inteligente que trabaja para tu negocio las 24 horas.</p>
+      <div class="hero-actions">
+        <a class="btn btn-accent" href="{{.Site.WhatsAppURL}}" target="_blank" rel="noopener">
+          Probar ahora {{icon "arrow-right"}}
+        </a>
+        <a class="btn btn-outline-light" href="#que-es">Descubrir AIBOT</a>
+      </div>
+      <dl class="hero-points">
+        <div><dt>24/7</dt><dd>Atención automática</dd></div>
+        <div><dt>100%</dt><dd>Datos en tu servidor</dd></div>
+        <div><dt>0</dt><dd>Consultas sin respuesta</dd></div>
+      </dl>
+    </div>
+
+    <div class="hero-visual">
+      {{template "chat-mockup" .}}
+    </div>
+  </div>
+</section>
+
+<section class="logos" aria-label="Tecnologías">
+  <div class="container">
+    <p class="logos-title">Construido sobre tecnologías que ya conoces</p>
+    <div class="logos-row">
+      <span>{{icon "message-circle"}} WhatsApp</span>
+      <span>{{icon "sparkles"}} OpenAI</span>
+      <span>{{icon "server"}} AWS EC2</span>
+      <span>{{icon "cpu"}} IA en local</span>
+      <span>{{icon "code"}} Código propio</span>
+    </div>
+  </div>
+</section>
+
+<section class="section section-soft" id="que-es">
+  <div class="container">
+    <div class="section-head center">
+      <p class="eyebrow">Qué es AIBOT</p>
+      <h2>Tu atención al cliente, <span class="text-accent">en piloto automático</span></h2>
+      <p>AIBOT es un chatbot inteligente diseñado para empresas que reciben muchas consultas repetitivas por WhatsApp. Responde automáticamente sobre ubicación, servicios, horarios y mucho más; además, gestiona citas, envía recordatorios y deriva a un operador humano cuando hace falta.</p>
+    </div>
+
+    <div class="card-grid col-3">
+      {{range .Features}}
+      <article class="card">
+        <span class="icon-box">{{icon .Icon}}</span>
+        <h3>{{.Title}}</h3>
+        <p>{{.Text}}</p>
+      </article>
+      {{end}}
+    </div>
+
+    <div class="section-cta">
+      <a class="btn btn-primary" href="#contacto">{{icon "rocket"}} Integrar AIBOT en mi empresa</a>
+    </div>
+  </div>
+</section>
+
+<section class="section section-plans" id="planes">
+  <div class="container">
+    <div class="section-head center section-head-light">
+      <p class="eyebrow eyebrow-light">Planes y precios</p>
+      <h2>Un plan claro, sin sorpresas</h2>
+      <p>Instala AIBOT en tu infraestructura y paga solo por lo que necesitas. Personalización adicional a 25 €/hora.</p>
+    </div>
+
+    <div class="plan-grid">
+      {{range .Plans}}
+      <article class="plan{{if .Highlight}} plan-highlight{{end}}">
+        {{if .Highlight}}<span class="plan-badge">Recomendado</span>{{end}}
+        <p class="plan-eyebrow">{{.Eyebrow}}</p>
+        <h3>{{.Name}}</h3>
+        <p class="plan-desc">{{.Description}}</p>
+        <p class="plan-price">{{.Price}}</p>
+        <p class="plan-note">{{.PriceNote}}</p>
+        <ul class="plan-features">
+          {{range .Features}}
+          <li>{{icon "check"}} <span>{{.}}</span></li>
+          {{end}}
+        </ul>
+        <a class="btn {{if .Highlight}}btn-primary{{else}}btn-outline{{end}} btn-block" href="#contacto">{{.CTA}}</a>
+      </article>
+      {{end}}
+    </div>
+
+    <p class="plans-foot">¿Necesitas algo distinto? <a href="#contacto">Cuéntanos tu caso</a> y preparamos una propuesta a medida.</p>
+  </div>
+</section>
+
+<section class="section" id="ventajas">
+  <div class="container">
+    <div class="section-head center">
+      <p class="eyebrow">Ventajas del plan de tarifa única</p>
+      <h2>El sistema se adapta a ti, <span class="text-accent">no al revés</span></h2>
+      <p>Frente a las soluciones cerradas de suscripción, AIBOT te da propiedad, control y libertad para personalizarlo.</p>
+    </div>
+
+    <div class="card-grid col-3">
+      {{range .Advantages}}
+      <article class="card card-advantage">
+        <span class="icon-box">{{icon .Icon}}</span>
+        <h3>{{.Title}}</h3>
+        <p>{{.Text}}</p>
+      </article>
+      {{end}}
+    </div>
+  </div>
+</section>
+
+<section class="section section-system" id="sistema">
+  <div class="container system-grid">
+    <div class="system-copy">
+      <p class="eyebrow eyebrow-light">Resumen del sistema</p>
+      <h2>Una solución completa, dentro de tu infraestructura</h2>
+      <p>AIBOT mejora la comunicación entre tu empresa y tus clientes mediante WhatsApp. Utiliza inteligencia artificial para responder consultas comunes, gestionar citas y enviar recordatorios, todo integrado en el canal que tus clientes ya usan.</p>
+      <ul class="system-list">
+        {{range .Summary}}
+        <li>
+          <span class="system-check">{{icon "check"}}</span>
+          <div><strong>{{.Title}}</strong><span>{{.Text}}</span></div>
+        </li>
+        {{end}}
+      </ul>
+    </div>
+
+    <div class="stack" aria-hidden="true">
+      <div class="stack-row">
+        <span class="stack-icon">{{icon "whatsapp"}}</span>
+        <div><strong>WhatsApp</strong><em>Tu canal de siempre</em></div>
+        <span class="stack-pill">Cliente</span>
+      </div>
+      <div class="stack-line"></div>
+      <div class="stack-row stack-core">
+        <span class="stack-icon">{{icon "robot"}}</span>
+        <div><strong>AIBOT</strong><em>IA + datos de tu negocio</em></div>
+        <span class="stack-pill stack-pill-live">Activo</span>
+      </div>
+      <div class="stack-line"></div>
+      <div class="stack-row">
+        <span class="stack-icon">{{icon "database"}}</span>
+        <div><strong>Tu servidor</strong><em>Bases de datos y modelos</em></div>
+        <span class="stack-pill">Privado</span>
+      </div>
+      <p class="stack-foot">{{icon "shield"}} Sin ceder tus datos a terceros</p>
+    </div>
+  </div>
+</section>
+
+<section class="section section-contact" id="contacto">
+  <div class="container contact-grid">
+    <div class="contact-copy">
+      <p class="eyebrow">Contacto</p>
+      <h2>Hablemos de tu proyecto</h2>
+      <p class="lede">Envíanos un mensaje y te responderemos lo antes posible. También puedes escribirnos directamente por WhatsApp o llamarnos.</p>
+
+      <ul class="contact-list">
+        <li>
+          <span class="icon-box">{{icon "mail"}}</span>
+          <div><strong>Email</strong><a href="mailto:{{.Site.Email}}">{{.Site.Email}}</a></div>
+        </li>
+        <li>
+          <span class="icon-box">{{icon "phone"}}</span>
+          <div><strong>Teléfono</strong><a href="{{tel .Site.Phone}}">{{.Site.Phone}}</a></div>
+        </li>
+        <li>
+          <span class="icon-box">{{icon "whatsapp"}}</span>
+          <div><strong>WhatsApp</strong><a href="{{.Site.WhatsAppURL}}" target="_blank" rel="noopener">Entrar al grupo de prueba</a></div>
+        </li>
+        <li>
+          <span class="icon-box">{{icon "map-pin"}}</span>
+          <div><strong>Ubicación</strong><a href="https://maps.app.goo.gl/BKWKsA7SGpoQuSQo6" target="_blank" rel="noopener">{{.Site.Location}}</a></div>
+        </li>
+      </ul>
+
+      <p class="contact-note">{{icon "globe"}} Proyecto open source en <a href="{{.Site.GitHub}}" target="_blank" rel="noopener">GitHub</a>.</p>
+    </div>
+
+    <div class="contact-panel">
+      <h3>Envíanos un mensaje</h3>
+      <p class="muted">Cuéntanos qué necesitas y te propondremos la mejor forma de integrar AIBOT.</p>
+      {{template "contact-form" .}}
+    </div>
+  </div>
+</section>
+{{end}}

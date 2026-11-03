@@ -1,0 +1,103 @@
+name: aibotia-dev
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-aibotia}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aibotia}
+      POSTGRES_DB: ${POSTGRES_DB:-aibotia}
+      TZ: ${TZ:-Europe/Madrid}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata-dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aibotia} -d ${POSTGRES_DB:-aibotia}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redisdata-dev:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  botd:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: aibotia-dev-botd
+    working_dir: /src
+    init: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_ENV: development
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      LOG_FORMAT: ${LOG_FORMAT:-text}
+      HTTP_ADDR: ":3000"
+      API_KEY: ${API_KEY:-dev-api-key}
+      CORS_ALLOWED_ORIGINS: "${CORS_ALLOWED_ORIGINS:-*}"
+      ADMIN_ENABLED: ${ADMIN_ENABLED:-true}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_OPERATOR_NAME: ${ADMIN_OPERATOR_NAME:-}
+      ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET:-}
+      ADMIN_SESSION_TTL: ${ADMIN_SESSION_TTL:-12h}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-6.1-sol}
+      OPENAI_EMBED_MODEL: ${OPENAI_EMBED_MODEL:-text-embedding-3-small}
+      RAG_THRESHOLD: ${RAG_THRESHOLD:-0.78}
+      PROMPTS_DIR: data/seeds/prompts
+      DATA_DIR: data/seeds
+      DATABASE_URL: postgres://${POSTGRES_USER:-aibotia}:${POSTGRES_PASSWORD:-aibotia}@postgres:5432/${POSTGRES_DB:-aibotia}?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
+      AUTO_MIGRATE: "true"
+      WHATSAPP_ENABLED: ${WHATSAPP_ENABLED:-true}
+      HOURS_TO_ACTIVE: ${HOURS_TO_ACTIVE:-168}
+      BUFFER_MIN_MS: ${BUFFER_MIN_MS:-1000}
+      BUFFER_MAX_MS: ${BUFFER_MAX_MS:-15000}
+      REMINDER_CRON: "${REMINDER_CRON:-*/10 * * * *}"
+      SPAM_LIMIT: ${SPAM_LIMIT:-5}
+      SPAM_WINDOW: ${SPAM_WINDOW:-60s}
+      LOCATION_NAME: ${LOCATION_NAME:-}
+      LOCATION_ADDRESS: ${LOCATION_ADDRESS:-}
+      LOCATION_LAT: ${LOCATION_LAT:-0}
+      LOCATION_LNG: ${LOCATION_LNG:-0}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_SECURE: ${SMTP_SECURE:-starttls}
+      CONTACT_TO: ${CONTACT_TO:-info@nestorpons.com}
+      TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-}
+      TURNSTILE_SECRET: ${TURNSTILE_SECRET:-}
+      TZ: ${TZ:-Europe/Madrid}
+    ports:
+      - "${HTTP_PORT:-3000}:3000"
+    volumes:
+      - .:/src
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+    restart: unless-stopped
+
+volumes:
+  pgdata-dev:
+  redisdata-dev:
+  go-mod-cache:
+  go-build-cache:

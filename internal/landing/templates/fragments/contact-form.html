@@ -1,0 +1,62 @@
+{{define "contact-form"}}
+<div id="contact-form" class="contact-form-wrap">
+  {{if .Form.OK}}
+  <div class="form-success" role="status">
+    <span class="success-icon">{{icon "check"}}</span>
+    <h3>¡Mensaje enviado!</h3>
+    <p>Gracias por escribirnos. Te responderemos lo antes posible.</p>
+    <button class="btn btn-outline" type="button"
+      hx-get="/contacto/formulario" hx-target="#contact-form" hx-swap="outerHTML">
+      Enviar otro mensaje
+    </button>
+  </div>
+  {{else}}
+  <form class="contact-form" method="post" action="/contacto"
+    hx-post="/contacto" hx-target="#contact-form" hx-swap="outerHTML">
+    {{if .Form.Error}}
+    <div class="alert alert-error" role="alert">{{icon "x"}} <span>{{.Form.Error}}</span></div>
+    {{end}}
+
+    <div class="hp" aria-hidden="true">
+      <label>No rellenar<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+    </div>
+
+    <div class="field">
+      <label for="nombre">Nombre</label>
+      <input type="text" id="nombre" name="nombre" value="{{.Form.Name}}" maxlength="120"
+        autocomplete="name" required placeholder="Tu nombre">
+    </div>
+
+    <div class="field">
+      <label for="email">Correo electrónico</label>
+      <input type="email" id="email" name="email" value="{{.Form.Email}}" maxlength="160"
+        autocomplete="email" required placeholder="tucorreo@ejemplo.com">
+    </div>
+
+    <div class="field">
+      <label for="mensaje">Mensaje</label>
+      <textarea id="mensaje" name="mensaje" rows="5" maxlength="2000" required
+        placeholder="Cuéntanos qué necesitas…">{{.Form.Message}}</textarea>
+    </div>
+
+    <label class="check">
+      <input type="checkbox" name="privacidad" required>
+      <span>Acepto que mis datos se utilicen únicamente para responder a esta consulta.</span>
+    </label>
+
+    {{if .TurnstileSiteKey}}
+    <div class="captcha">
+      <div class="cf-turnstile" data-sitekey="{{.TurnstileSiteKey}}" data-theme="light"
+        data-language="es" data-response-field-name="cf-turnstile-response"></div>
+    </div>
+    {{end}}
+
+    <button class="btn btn-primary btn-block" type="submit">
+      <span class="btn-label">Enviar mensaje</span>
+      <span class="btn-loading">Enviando…</span>
+    </button>
+    <p class="form-note">Sin compromiso. Te responderemos lo antes posible.</p>
+  </form>
+  {{end}}
+</div>
+{{end}}

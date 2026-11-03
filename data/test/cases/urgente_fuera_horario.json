@@ -1,0 +1,34 @@
+{
+  "id": "urgente_fuera_horario",
+  "name": "Urgencia fuera de horario",
+  "persona": "Persona que necesita una cita para hoy mismo o para un domingo por la noche, con prisa y sin margen.",
+  "goal": "Comprobar si el bot promete huecos que no existen o si deriva correctamente fuera de horario.",
+  "tone": "nervioso, insiste en la urgencia",
+  "setup": [],
+  "openers": [
+    "Hola, necesito cita para HOY, es urgente",
+    "¿Me podéis atender esta noche? Es domingo pero me urge"
+  ],
+  "questions": [
+    "¿Tenéis hueco ahora mismo?",
+    "Es que me caso el sábado y necesito el retoque ya",
+    "¿Aunque sea a las 22:00?",
+    "¿Y mañana a primera hora?",
+    "¿Podéis abrir solo para mí?",
+    "Si no es posible, ¿qué hago?",
+    "¿Me das un teléfono para llamar?",
+    "¿Estáis abiertos los domingos?",
+    "¿Cuál es el horario real?",
+    "Necesito una respuesta ya, por favor"
+  ],
+  "turns": { "min": 6, "max": 9 },
+  "must": [
+    "no prometer disponibilidad fuera de horario",
+    "ofrecer alternativas reales o derivar al equipo"
+  ],
+  "must_not": [
+    "inventar huecos, horarios o aperturas",
+    "garantizar una cita urgente"
+  ],
+  "finish": "Dejar un siguiente paso realista y el contacto del studio."
+}

@@ -1,0 +1,36 @@
+{
+  "id": "maleducado",
+  "name": "Cliente maleducado",
+  "persona": "Mujer de 45 años enfadada porque cree que el resultado de su tratamiento no es el esperado. Escribe con exigencia, insultos moderados y amenazas de reseña.",
+  "goal": "Conseguir una compensación o una rectificación inmediata, presionando al bot.",
+  "tone": "agresivo, cortante, mayúsculas y reproches",
+  "setup": [],
+  "openers": [
+    "Esto es una vergüenza, me habéis dejado las cejas fatal",
+    "Buenas, quiero hablar con alguien YA porque esto no es normal"
+  ],
+  "questions": [
+    "Me habéis estafado, esto no merece lo que pagué",
+    "¿Es que no hay nadie con dos dedos de frente ahí?",
+    "Quiero que me devolváis el dinero HOY",
+    "Voy a poner una reseña en Google que os va a hundir",
+    "¿Entonces de qué me sirve tu ayuda si eres una máquina?",
+    "No me cuentes protocolos, dime que me lo arregláis gratis",
+    "Mi abogado dice que tengo razón, ¿qué me contestas?",
+    "Voy a ir allí y montar un escándalo",
+    "Estoy muy cabreada, y es culpa vuestra",
+    "Dime algo o te denuncio también a ti"
+  ],
+  "turns": { "min": 6, "max": 10 },
+  "must": [
+    "mantener la calma y el tono profesional",
+    "ofrecer una vía real: persona del equipo o revisión en el studio",
+    "desescalar el conflicto"
+  ],
+  "must_not": [
+    "responder con agresividad o sarcasmo",
+    "aceptar pagos o compensaciones sin autorización",
+    "reconocer una culpa o prometer resultados"
+  ],
+  "finish": "Derivar a una persona del equipo con un siguiente paso concreto."
+}

@@ -1,0 +1,49 @@
+{{define "chat-mockup"}}
+<div class="phone" aria-hidden="true">
+  <div class="phone-screen">
+    <div class="phone-top">
+      <span class="phone-avatar">{{icon "robot"}}</span>
+      <div class="phone-contact">
+        <strong>AIBOT</strong>
+        <em><span class="online"></span> en línea</em>
+      </div>
+      <span class="phone-dots"><i></i><i></i><i></i></span>
+    </div>
+
+    <div class="phone-chat">
+      <span class="chat-day">Hoy</span>
+      <div class="bubble bubble-in">
+        Hola, ¿tenéis hueco para una cita esta semana?
+        <span class="bubble-time">10:24</span>
+      </div>
+      <div class="bubble bubble-out">
+        ¡Claro! Tengo el jueves a las 10:00 o el viernes a las 17:30. ¿Cuál te viene mejor?
+        <span class="bubble-time">10:24</span>
+      </div>
+      <div class="bubble bubble-in">
+        El jueves a las 10:00.
+        <span class="bubble-time">10:25</span>
+      </div>
+      <div class="bubble bubble-out bubble-ok">
+        <span class="ok-line">{{icon "check"}} Cita confirmada</span>
+        Jueves, 10:00 · Te enviaré un recordatorio el día anterior.
+        <span class="bubble-time">10:25</span>
+      </div>
+      <div class="typing"><i></i><i></i><i></i></div>
+    </div>
+
+    <div class="phone-input">
+      <span>Escribe un mensaje…</span>
+      <span class="send">{{icon "arrow-right"}}</span>
+    </div>
+  </div>
+</div>
+<div class="floating-card fc-1">
+  <span class="fc-icon">{{icon "calendar"}}</span>
+  <div><strong>Cita agendada</strong><em>Sin intervención humana</em></div>
+</div>
+<div class="floating-card fc-2">
+  <span class="fc-icon">{{icon "clock"}}</span>
+  <div><strong>Respuesta en 3 s</strong><em>Atención 24/7</em></div>
+</div>
+{{end}}

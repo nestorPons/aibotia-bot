@@ -1,0 +1,3 @@
+Entendemos que ser mamá conlleva muchos retos, pero te recordamos que este espacio está pensado para que disfrutes de un momento solo para ti.
+Por normas de sanidad, no está permitido el ingreso de acompañantes —incluidos niños— dentro de la sala de trabajo. Si necesitas traer a tu peque, te recomendamos venir con un acompañante adulto que pueda esperarlo contigo en la recepción o fuera del estudio.
+Queremos que puedas relajarte y disfrutar de tu cita sin preocupaciones. 💆‍♀️❤️

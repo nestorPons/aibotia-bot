@@ -1,0 +1,1587 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>aibotia · panel</title>
+<script>
+  // Aplica el tema antes de pintar para evitar el destello al cargar.
+  (function () {
+    var theme = 'dark';
+    try {
+      if (localStorage.getItem('aibotia.theme') === 'light') theme = 'light';
+    } catch (_) {}
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+<style>
+  :root {
+    color-scheme:dark;
+    --bg:#0b141a;          /* fondo app / chat */
+    --panel:#111b21;       /* tarjetas, tablas, diálogos */
+    --panel-2:#202c33;     /* cabeceras, barras, burbuja entrante */
+    --panel-3:#2a3942;     /* hover, campos, elementos activos */
+    --line:#222d34;
+    --border:#2f3b43;
+    --text:#e9edef;
+    --muted:#8696a0;
+    --accent:#00a884;
+    --accent-strong:#00a884;
+    --accent-hover:#06cf9c;
+    --accent-soft:rgba(0,168,132,.12);
+    --bubble-out:#005c4b;
+    --bubble-in:var(--panel-2);
+    --chat-bg:#0b141a;
+    --danger:#f15c6d;
+    --warn:#ffbc38;
+    --warn-soft:rgba(255,188,56,.1);
+    --on-accent:#111b21;
+    --link:#53bdeb;
+    --hover:rgba(233,237,239,.06);
+    --bubble-meta:rgba(233,237,239,.6);
+    --bubble-shadow:rgba(0,0,0,.35);
+    --chat-dots:rgba(233,237,239,.035);
+    --shadow-lg:rgba(0,0,0,.5);
+    --backdrop:rgba(11,20,26,.75);
+    --switch-knob:#e9edef;
+  }
+  /* Tema claro inspirado en WhatsApp Web. */
+  :root[data-theme="light"] {
+    color-scheme:light;
+    --bg:#f0f2f5;
+    --panel:#ffffff;
+    --panel-2:#f0f2f5;
+    --panel-3:#e9edef;
+    --line:#e1e6ea;
+    --border:#d1d7db;
+    --text:#111b21;
+    --muted:#667781;
+    --accent:#008069;
+    --accent-strong:#008069;
+    --accent-hover:#006e5b;
+    --accent-soft:rgba(0,128,105,.1);
+    --bubble-out:#d9fdd3;
+    --bubble-in:#ffffff;
+    --chat-bg:#efeae2;
+    --danger:#c62828;
+    --warn:#8a6100;
+    --warn-soft:#fff6df;
+    --on-accent:#ffffff;
+    --link:#027eb5;
+    --hover:rgba(17,27,33,.06);
+    --bubble-meta:rgba(17,27,33,.55);
+    --bubble-shadow:rgba(11,20,26,.13);
+    --chat-dots:rgba(17,27,33,.05);
+    --shadow-lg:rgba(11,20,26,.2);
+    --backdrop:rgba(11,20,26,.45);
+    --switch-knob:#ffffff;
+  }
+  * { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--panel-3) transparent; }
+  ::selection { background:rgba(0,168,132,.32); color:var(--text); }
+  body { margin:0; font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text); }
+  header { display:flex; align-items:center; gap:16px; padding:14px 20px; border-bottom:1px solid var(--border); background:var(--panel-2); position:sticky; top:0; z-index:10; }
+  header h1 { font-size:15px; margin:0; font-weight:600; color:var(--accent); }
+  nav { display:flex; gap:6px; flex-wrap:wrap; }
+  nav button { background:transparent; color:var(--muted); border:1px solid transparent; padding:6px 12px; border-radius:6px; cursor:pointer; }
+  nav button:hover { background:var(--hover); color:var(--text); }
+  nav button.active { color:var(--accent); border-color:transparent; background:var(--panel-3); }
+  .theme-toggle { display:inline-flex; align-items:center; gap:7px; flex:none; }
+  .theme-ico { width:14px; height:14px; flex:none; color:var(--muted); opacity:.7; user-select:none; transition:color .15s, opacity .15s; }
+  .theme-ico.on { color:var(--accent); opacity:1; }
+  .theme-toggle .switch { width:38px; height:20px; }
+  .theme-toggle .switch .slider::before { width:14px; height:14px; }
+  .theme-toggle .switch input:checked + .slider::before { transform:translateX(18px); }
+  .theme-toggle .switch input:focus-visible + .slider { outline:2px solid var(--accent); outline-offset:2px; }
+  .spacer { flex:1; }
+  main { padding:20px; max-width:1440px; margin:0 auto; }
+  .toolbar { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .toolbar h2 { margin:0; font-size:16px; }
+  button, .btn { background:var(--panel-2); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:7px 12px; cursor:pointer; font:inherit; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:var(--on-accent); font-weight:600; }
+  button.danger { color:var(--danger); border-color:rgba(241,92,109,.4); }
+  button:hover, .btn:hover { background:var(--panel-3); }
+  button.primary:hover { background:var(--accent-hover); }
+  button.danger:hover { background:rgba(241,92,109,.12); }
+  button:disabled { opacity:.5; cursor:default; }
+  table { width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+  th, td { text-align:left; padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; background:var(--panel-2); font-size:12px; text-transform:uppercase; letter-spacing:.03em; }
+  tr:last-child td { border-bottom:none; }
+  td.actions { white-space:nowrap; text-align:right; }
+  .pill { display:inline-block; padding:1px 8px; border-radius:999px; font-size:12px; border:1px solid var(--border); color:var(--muted); }
+  .pill.on { color:var(--accent); border-color:rgba(0,168,132,.4); background:var(--accent-soft); }
+  .pill.off { color:var(--danger); border-color:rgba(241,92,109,.4); background:rgba(241,92,109,.1); }
+  .muted { color:var(--muted); }
+  code { color:var(--link); }
+  dialog { background:var(--panel); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:0; width:min(720px,94vw); }
+  dialog::backdrop { background:var(--backdrop); }
+  .dialog-body { padding:18px 20px; }
+  .dialog-head { display:flex; align-items:center; gap:10px; padding:14px 20px; border-bottom:1px solid var(--line); }
+  .dialog-head h3 { margin:0; font-size:15px; }
+  .dialog-foot { display:flex; justify-content:flex-end; gap:8px; padding:14px 20px; border-top:1px solid var(--line); }
+  form.grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  label { display:flex; flex-direction:column; gap:5px; font-size:12px; color:var(--muted); }
+  label.full { grid-column:1/-1; }
+  input, select, textarea { background:var(--panel-3); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:8px 9px; font:inherit; }
+  input::placeholder, textarea::placeholder { color:var(--muted); }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 2px rgba(0,168,132,.22); }
+  textarea { min-height:280px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12.5px; white-space:pre; }
+  input[type=checkbox] { width:auto; accent-color:var(--accent); }
+  .error { color:var(--danger); min-height:18px; font-size:12px; }
+  #toast { position:fixed; right:18px; bottom:18px; background:var(--panel-2); border:1px solid var(--border); border-radius:6px; padding:10px 14px; opacity:0; transition:.2s; pointer-events:none; max-width:420px; z-index:50; color:var(--text); }
+  #toast.show { opacity:1; }
+  #toast.err { border-color:rgba(241,92,109,.5); color:var(--danger); }
+  .versions { max-height:420px; overflow:auto; display:flex; flex-direction:column; gap:8px; }
+  .version { border:1px solid var(--line); border-radius:6px; padding:10px; display:flex; gap:12px; align-items:center; }
+  .version pre { margin:0; flex:1; max-height:60px; overflow:hidden; white-space:pre-wrap; color:var(--muted); font-size:12px; }
+  .hidden { display:none !important; }
+
+  /* Inbox */
+  .inbox { display:grid; grid-template-columns:minmax(280px,360px) 1fr; gap:14px; height:calc(100vh - 150px); min-height:480px; }
+  .threads-col { display:flex; flex-direction:column; gap:8px; min-height:0; }
+  .threads-search { display:flex; gap:6px; flex:none; }
+  .threads-search input { flex:1; min-width:0; max-width:none; border-radius:6px; }
+  .threads-search button { border-radius:6px; }
+  .threads { flex:1; min-height:0; background:var(--panel); border:1px solid var(--line); border-radius:6px; overflow:auto; }
+  .threads-col .pager { margin-top:0; }
+  .thread { padding:11px 13px; border-bottom:1px solid var(--line); cursor:pointer; }
+  .thread:hover { background:var(--panel-2); }
+  .thread.active { background:var(--panel-3); }
+  .thread.needs-op { border-left:3px solid var(--warn); background:var(--warn-soft); }
+  .thread.needs-op:hover { background:rgba(255,188,56,.16); }
+  .thread.needs-op .t-name { color:var(--warn); }
+  .thread .t-name { font-weight:600; font-size:13px; }
+  .thread .t-row { display:flex; align-items:center; gap:8px; }
+  .thread .t-row .t-name { flex:1; }
+  .op-badge { display:inline-flex; align-items:center; gap:4px; margin:4px 0 2px; padding:1px 7px; border-radius:6px; font-size:11px; border:1px solid rgba(255,188,56,.35); background:var(--warn-soft); color:var(--warn); }
+  .op-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--warn); margin-left:6px; vertical-align:middle; animation:opPulse 1.6s ease-in-out infinite; }
+  @keyframes opPulse {
+    0%, 100% { opacity:1; box-shadow:0 0 0 0 rgba(255,188,56,.55); }
+    50% { opacity:.55; box-shadow:0 0 0 5px rgba(255,188,56,0); }
+  }
+  @media (prefers-reduced-motion: reduce) { .op-dot { animation:none; } }
+  .pill.op { color:var(--warn); border-color:rgba(255,188,56,.35); background:var(--warn-soft); }
+  .threads-filters { display:flex; gap:6px; flex:none; }
+  .threads-filters select { flex:1; min-width:0; border-radius:6px; padding:7px 8px; font-size:12px; }
+  .switch { position:relative; display:inline-flex; width:34px; height:18px; flex:none; cursor:pointer; }
+  .switch input { position:absolute; opacity:0; width:0; height:0; }
+  .switch .slider { position:absolute; inset:0; background:var(--panel-3); border:1px solid var(--border); border-radius:999px; transition:.15s; }
+  .switch .slider::before { content:""; position:absolute; width:12px; height:12px; left:2px; top:2px; background:var(--muted); border-radius:50%; transition:.15s; }
+  .switch input:checked + .slider { background:var(--accent); border-color:var(--accent); }
+  .switch input:checked + .slider::before { transform:translateX(16px); background:var(--switch-knob); }
+  .thread .t-preview { color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .thread .t-preview.typing { color:var(--accent); font-style:italic; }
+  .thread .t-time { color:var(--muted); font-size:11px; }
+  .conversation { display:flex; flex-direction:column; background:var(--panel); border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+  .conv-head { padding:12px 14px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; background:var(--panel-2); }
+  .conv-summary { border-bottom:1px solid var(--line); background:var(--panel-2); flex:none; }
+  .summary-toggle { display:flex; align-items:center; gap:8px; width:100%; padding:9px 14px; background:transparent; border:none; border-radius:0; color:var(--text); cursor:pointer; text-align:left; font:inherit; }
+  .summary-toggle:hover { background:var(--panel-3); filter:none; }
+  .summary-title { font-weight:600; font-size:12.5px; }
+  .summary-source { font-size:11px; }
+  .summary-chev { color:var(--muted); transition:transform .15s; }
+  .conv-summary.collapsed .summary-chev { transform:rotate(-90deg); }
+  .conv-summary.collapsed .summary-body { display:none; }
+  .summary-body { padding:0 14px 12px; display:flex; flex-direction:column; gap:8px; }
+  .summary-chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .chip { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:6px; border:1px solid var(--border); background:var(--panel); font-size:11.5px; color:var(--text); }
+  .chip b { font-weight:600; color:var(--muted); }
+  .chip.warn { border-color:rgba(255,188,56,.35); background:var(--warn-soft); color:var(--warn); }
+  .chip.ok { border-color:rgba(0,168,132,.4); background:var(--accent-soft); color:var(--accent); }
+  .summary-points { margin:0; padding-left:18px; display:flex; flex-direction:column; gap:3px; font-size:12.5px; line-height:1.45; }
+  .summary-points li::marker { color:var(--accent); }
+  .summary-loading { color:var(--muted); font-size:12px; display:flex; align-items:center; gap:8px; }
+  .summary-loading::before { content:""; width:8px; height:8px; border-radius:50%; background:var(--accent); animation:opPulse 1.4s ease-in-out infinite; }
+  .conv-body { flex:1; overflow:auto; padding:14px; display:flex; flex-direction:column; gap:8px; background-color:var(--chat-bg); background-image:radial-gradient(var(--chat-dots) 1px, transparent 1px); background-size:18px 18px; }
+  .bubble { max-width:78%; padding:9px 12px; border-radius:6px; font-size:13px; white-space:pre-wrap; box-shadow:0 1px .5px var(--bubble-shadow); }
+  .bubble.from { align-self:flex-end; background:var(--bubble-out); border-bottom-right-radius:2px; }
+  .bubble.to { align-self:flex-start; background:var(--bubble-in); border-bottom-left-radius:2px; }
+  .bubble .b-meta { display:block; font-size:10px; color:var(--bubble-meta); margin-top:4px; }
+  .bubble .b-sender { display:block; font-size:11.5px; font-weight:700; color:var(--link); margin-bottom:3px; }
+  .bubble.pending { opacity:.82; }
+  .live-badge { display:inline-flex; align-items:center; gap:6px; font-size:11.5px; color:var(--muted); white-space:nowrap; }
+  .live-badge::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--muted); }
+  .live-badge.online { color:var(--accent); }
+  .live-badge.online::before { background:var(--accent); box-shadow:0 0 0 3px rgba(0,168,132,.18); }
+  .live-badge.offline { color:var(--warn); }
+  .live-badge.offline::before { background:var(--warn); }
+  .typing-bubble { align-self:flex-start; background:var(--bubble-in); border-radius:6px; padding:11px 14px; display:inline-flex; gap:4px; box-shadow:0 1px .5px var(--bubble-shadow); }
+  .typing-bubble span { width:6px; height:6px; border-radius:50%; background:var(--muted); animation:typingDot 1.2s infinite ease-in-out; }
+  .typing-bubble span:nth-child(2) { animation-delay:.15s; }
+  .typing-bubble span:nth-child(3) { animation-delay:.3s; }
+  @keyframes typingDot { 0%,80%,100% { opacity:.25; transform:translateY(0); } 40% { opacity:1; transform:translateY(-3px); } }
+  @media (prefers-reduced-motion: reduce) { .typing-bubble span { animation:none; } }
+  .conv-reply { position:relative; padding:12px; border-top:1px solid var(--border); background:var(--panel-2); }
+  .composer { display:flex; flex-direction:column; gap:8px; }
+  .composer-row { display:flex; align-items:flex-end; gap:8px; }
+  .composer textarea { flex:1; min-height:38px; max-height:140px; resize:none; border-radius:6px; padding:9px 10px; line-height:1.4; }
+  .composer .icon-btn { flex:none; width:38px; height:38px; padding:0; border-radius:6px; font-size:17px; line-height:1; display:inline-flex; align-items:center; justify-content:center; }
+  .composer .icon-btn.active { border-color:var(--accent); color:var(--accent); }
+  .composer-panel { position:absolute; left:12px; right:12px; bottom:calc(100% - 6px); max-height:280px; overflow:auto; background:var(--panel-2); border:1px solid var(--border); border-radius:6px; box-shadow:0 10px 30px var(--shadow-lg); padding:10px; z-index:5; }
+  .panel-head { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .panel-head strong { font-size:12px; text-transform:uppercase; letter-spacing:.03em; color:var(--muted); }
+  .reply-hint { font-size:11px; color:var(--muted); }
+  .emoji-group { margin-bottom:8px; }
+  .emoji-group h4 { margin:0 0 4px; font-size:11px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.03em; }
+  .emoji-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(32px,1fr)); gap:2px; }
+  .emoji-grid button { background:transparent; border:none; border-radius:6px; padding:4px; font-size:19px; line-height:1; cursor:pointer; }
+  .emoji-grid button:hover { background:var(--panel-3); filter:none; }
+  .quick-list { display:flex; flex-direction:column; gap:4px; margin-bottom:8px; }
+  .quick-item { display:flex; align-items:flex-start; gap:6px; }
+  .quick-item .quick-use { flex:1; text-align:left; white-space:normal; border-radius:6px; padding:6px 9px; }
+  .quick-item .quick-del { flex:none; padding:6px 9px; border-radius:6px; color:var(--muted); }
+  .quick-add { display:flex; gap:6px; }
+  .quick-add input { flex:1; border-radius:6px; }
+  .quick-add button { border-radius:6px; }
+  .pager { display:flex; align-items:center; gap:10px; margin-top:12px; }
+  .search { flex:1; max-width:320px; }
+
+  /* Filtro segmentado (3 estados) */
+  .segmented { display:inline-flex; border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+  .segmented button { border:none; border-radius:0; background:transparent; color:var(--muted); padding:6px 11px; }
+  .segmented button + button { border-left:1px solid var(--border); }
+  .segmented button:hover { background:var(--panel-3); }
+  .segmented button.active { background:var(--panel-3); color:var(--accent); }
+  .company-editor { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:16px 18px; }
+  .company-editor textarea { width:100%; min-height:420px; }
+  .company-hint { margin:0 0 10px; font-size:12px; color:var(--muted); }
+  .company-hint code { font-size:11.5px; }
+
+  /* WhatsApp */
+  .wa-card { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:24px; max-width:480px; }
+  .wa-status { font-size:16px; font-weight:600; margin-bottom:6px; }
+  .wa-qr { margin-top:16px; text-align:center; }
+  .wa-qr img { border:1px solid var(--line); border-radius:6px; background:#fff; padding:10px; }
+  .wa-qr p { color:var(--muted); font-size:12px; max-width:340px; margin:12px auto 0; }
+
+  /* Ajustes */
+  .settings-card { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:18px 20px; max-width:640px; display:flex; flex-direction:column; gap:16px; }
+  .setting-row { display:flex; align-items:flex-start; gap:18px; }
+  .setting-row + .setting-row { border-top:1px solid var(--line); padding-top:16px; }
+  .setting-text { flex:1; min-width:0; }
+  .setting-text strong { display:block; font-size:13.5px; margin-bottom:3px; }
+  .setting-text p { margin:0; color:var(--muted); font-size:12px; line-height:1.45; }
+  .setting-row .switch { margin-top:2px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>aibotia · panel</h1>
+  <nav>
+    <button id="tabServices" class="active" type="button">Servicios</button>
+    <button id="tabPrompts" type="button">Prompts</button>
+    <button id="tabCompany" type="button">Empresa</button>
+    <button id="tabMessages" type="button">Mensajes</button>
+    <button id="tabUsers" type="button">Usuarios</button>
+    <button id="tabSettings" type="button">Ajustes</button>
+    <button id="tabWhatsApp" type="button">WhatsApp</button>
+  </nav>
+  <div class="spacer"></div>
+  <div class="theme-toggle">
+    <svg class="theme-ico" data-theme-icon="dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Tema oscuro">
+      <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/>
+    </svg>
+    <label class="switch" title="Alternar tema claro / oscuro">
+      <input type="checkbox" id="themeToggle" role="switch" aria-label="Tema claro">
+      <span class="slider"></span>
+    </label>
+    <svg class="theme-ico" data-theme-icon="light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Tema claro">
+      <circle cx="12" cy="12" r="4"/>
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+    </svg>
+  </div>
+  <form method="post" action="/admin/logout"><button type="submit">Salir</button></form>
+</header>
+<main>
+  <section id="viewServices">
+    <div class="toolbar">
+      <h2>Catálogo de servicios</h2>
+      <span class="muted">Se inyecta en el prompt del agente</span>
+      <div class="spacer"></div>
+      <button class="primary" id="newService" type="button">Nuevo servicio</button>
+    </div>
+    <table>
+      <thead><tr><th>ID</th><th>Categoría</th><th>Nombre</th><th>Descripción</th><th>Precio</th><th>Duración</th><th>Equipo</th><th>Estado</th><th></th></tr></thead>
+      <tbody id="servicesBody"></tbody>
+    </table>
+  </section>
+
+  <section id="viewPrompts" class="hidden">
+    <div class="toolbar">
+      <h2>Prompts del agente</h2>
+      <span class="muted">Fuente de verdad en PostgreSQL · reindexado RAG al guardar</span>
+      <div class="spacer"></div>
+      <button class="primary" id="newPrompt" type="button">Nuevo prompt</button>
+    </div>
+    <table>
+      <thead><tr><th>Código</th><th>Nombre</th><th>Estado</th><th>Actualizado</th><th></th></tr></thead>
+      <tbody id="promptsBody"></tbody>
+    </table>
+  </section>
+
+  <section id="viewCompany" class="hidden">
+    <div class="toolbar">
+      <h2>Datos de empresa</h2>
+      <span class="muted">Se inyectan siempre en el prompt del sistema</span>
+      <div class="spacer"></div>
+      <button id="companyHistory" type="button">Historial</button>
+      <button class="primary" id="companySave" type="button">Guardar</button>
+    </div>
+    <div class="company-editor">
+      <p class="company-hint">
+        Dirección, ubicación, contacto, horarios, parking y accesos. La primera
+        línea <code>&lt;!-- pin: lat,lng | nombre | dirección --&gt;</code> fija
+        la ubicación que se envía por WhatsApp con <code>send_location</code>.
+      </p>
+      <label>
+        <span>Contenido del prompt <code>prompt_company</code></span>
+        <textarea id="companyContent" rows="22" spellcheck="false"></textarea>
+      </label>
+      <p class="error" id="companyError"></p>
+    </div>
+  </section>
+
+  <section id="viewMessages" class="hidden">
+    <div class="toolbar">
+      <h2>Mensajes</h2>
+      <span class="live-badge" id="liveBadge" title="Conectando…">Conectando…</span>
+      <span class="muted">Último mensaje por conversación</span>
+      <div class="spacer"></div>
+      <button id="refreshMessages" type="button">Actualizar</button>
+    </div>
+    <div class="inbox">
+      <div class="threads-col">
+        <div class="threads-search">
+          <input class="search" id="messageSearch" placeholder="Buscar nombre, alias o teléfono…" autocomplete="off">
+          <button id="messageSearchBtn" type="button">Buscar</button>
+        </div>
+        <div class="threads-filters">
+          <select id="threadOperator" title="Pendientes del operador">
+            <option value="">Todos los mensajes</option>
+            <option value="1">⚠️ Requieren respuesta</option>
+          </select>
+          <select id="threadAI" title="Estado de la IA">
+            <option value="">IA: todas</option>
+            <option value="active">IA activa</option>
+            <option value="inactive">IA inactiva</option>
+          </select>
+        </div>
+        <div class="threads" id="threadsBody"></div>
+        <div class="pager" id="threadsPager"></div>
+      </div>
+      <div class="conversation">
+        <div class="conv-head" id="convHead"><span class="muted">Selecciona una conversación</span></div>
+      <div class="conv-summary hidden" id="convSummary">
+        <button class="summary-toggle" id="summaryToggle" type="button" title="Mostrar/ocultar resumen">
+          <span class="summary-icon">📋</span>
+          <span class="summary-title">Resumen para el operador</span>
+          <span class="summary-source muted" id="summarySource"></span>
+          <span class="spacer"></span>
+          <span class="summary-chev" id="summaryChev">▾</span>
+        </button>
+        <div class="summary-body" id="summaryBody"></div>
+      </div>
+        <div class="conv-body" id="convBody"></div>
+        <form class="conv-reply" id="replyForm">
+          <div class="composer-panel hidden" id="emojiPanel"></div>
+          <div class="composer-panel hidden" id="quickPanel"></div>
+          <div class="composer">
+            <div class="composer-row">
+              <button class="icon-btn" id="emojiBtn" type="button" title="Emojis" aria-label="Emojis">😊</button>
+              <button class="icon-btn" id="quickBtn" type="button" title="Respuestas rápidas" aria-label="Respuestas rápidas">⚡</button>
+              <textarea id="replyText" name="text" rows="1" placeholder="Escribe una respuesta manual… (Enter envía · Shift+Enter salto de línea)" autocomplete="off"></textarea>
+              <button class="primary" type="submit" id="replyBtn" disabled>Enviar</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewUsers" class="hidden">
+    <div class="toolbar">
+      <h2>Usuarios</h2>
+      <input class="search" id="userSearch" placeholder="Buscar por nombre o JID…">
+      <button id="userSearchBtn" type="button">Buscar</button>
+      <div class="segmented" id="userAIFilter" role="group" aria-label="Filtrar por estado del bot">
+        <button type="button" data-ai="" class="active">Todos</button>
+        <button type="button" data-ai="active">Activo</button>
+        <button type="button" data-ai="inactive">Inactivo</button>
+      </div>
+      <div class="spacer"></div>
+      <button id="importContacts" type="button">Importar contactos</button>
+      <button class="primary" id="newUser" type="button">Nuevo usuario</button>
+    </div>
+    <table>
+      <thead><tr><th>JID</th><th>Nombre</th><th>Alias</th><th>IA activa</th><th>Rol</th><th>Tema</th><th>Idioma</th><th></th></tr></thead>
+      <tbody id="usersBody"></tbody>
+    </table>
+    <div class="pager" id="usersPager"></div>
+  </section>
+
+  <section id="viewSettings" class="hidden">
+    <div class="toolbar">
+      <h2>Ajustes del bot</h2>
+      <span class="muted">Comportamiento por defecto de la IA con los contactos nuevos</span>
+    </div>
+    <div class="settings-card">
+      <div class="setting-row">
+        <div class="setting-text">
+          <strong>Activar el bot a los nuevos usuarios</strong>
+          <p>Si está activo, cada contacto nuevo (al escribir por primera vez o al importar contactos) se crea con la IA en marcha. Si lo desactivas, quedan en espera y puedes activarlos uno a uno desde <em>Usuarios</em>. Los usuarios existentes no cambian.</p>
+        </div>
+        <label class="switch" id="activateNewUsersSwitch" title="Activar el bot a los nuevos usuarios">
+          <input type="checkbox" id="activateNewUsers">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewWhatsApp" class="hidden">
+    <div class="toolbar">
+      <h2>WhatsApp</h2>
+      <span class="muted">Estado de la conexión y vinculación por QR</span>
+    </div>
+    <div class="wa-card" id="waCard"></div>
+  </section>
+</main>
+
+<dialog id="serviceDialog">
+  <div class="dialog-head"><h3 id="serviceTitle">Nuevo servicio</h3></div>
+  <form id="serviceForm" class="dialog-body grid" method="dialog">
+    <label>ID<input name="id" required pattern="[a-z0-9_]{2,80}"></label>
+    <label>Categoría<input name="category" placeholder="Micropigmentación"></label>
+    <label class="full">Nombre<input name="name" required></label>
+    <label class="full">Descripción (contexto para el modelo)<textarea name="description" rows="3" placeholder="Qué incluye, para quién es, preparación…"></textarea></label>
+    <label>Precio (€)<input name="price" type="number" step="0.01" min="0" placeholder="vacío = a consultar"></label>
+    <label>Duración (min)<input name="duration_min" type="number" min="0" step="1"></label>
+    <label>Equipo (códigos)<input name="providers" placeholder="LL, TF"></label>
+    <label>Orden<input name="sort_order" type="number" step="1" value="0"></label>
+    <label class="full">Nota<input name="note" placeholder="Opcional"></label>
+    <label class="full"><span><input name="is_active" type="checkbox" checked> Activo</span></label>
+    <p class="error full" id="serviceError"></p>
+    <div class="dialog-foot full">
+      <button type="button" data-close="serviceDialog">Cancelar</button>
+      <button class="primary" type="submit">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="promptDialog">
+  <div class="dialog-head"><h3 id="promptTitle">Editar prompt</h3></div>
+  <form id="promptForm" class="dialog-body grid" method="dialog">
+    <label>Código<input name="code" required pattern="[a-z0-9_]{2,80}"></label>
+    <label>Nombre<input name="name"></label>
+    <label class="full">Descripción<input name="description"></label>
+    <label class="full">Contenido<textarea name="content" spellcheck="false"></textarea></label>
+    <label class="full"><span><input name="is_active" type="checkbox" checked> Activo (incluido en el prompt del agente)</span></label>
+    <p class="error full" id="promptError"></p>
+    <div class="dialog-foot full">
+      <button type="button" data-close="promptDialog">Cancelar</button>
+      <button class="primary" type="submit">Guardar y reindexar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="versionsDialog">
+  <div class="dialog-head">
+    <h3 id="versionsTitle">Historial</h3>
+    <div class="spacer"></div>
+    <button type="button" data-close="versionsDialog">Cerrar</button>
+  </div>
+  <div class="dialog-body versions" id="versionsBody"></div>
+</dialog>
+
+<dialog id="userDialog">
+  <div class="dialog-head"><h3 id="userTitle">Editar usuario</h3></div>
+  <form id="userForm" class="dialog-body grid" method="dialog">
+    <label class="full">ID (JID)<input name="id" placeholder="34600…@c.us"></label>
+    <label>Nombre<input name="name"></label>
+    <label>Alias<input name="alias"></label>
+    <label>Idioma<input name="lang" maxlength="5" placeholder="es"></label>
+    <label>Tema<input name="topic"></label>
+    <label>Rol<select name="role"><option value="2">Cliente</option><option value="1">Staff</option><option value="0">Admin</option></select></label>
+    <label>Buffer (ms)<input name="buffer_time" type="number" step="1" value="30000"></label>
+    <label>Temperatura<input name="temperature" type="number" step="0.1" min="0" max="2" value="0.5"></label>
+    <label class="full"><span><input name="active" type="checkbox" checked> IA activa</span></label>
+    <p class="error full" id="userError"></p>
+    <div class="dialog-foot full">
+      <button type="button" data-close="userDialog">Cancelar</button>
+      <button class="primary" type="submit">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast"></div>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtPrice = (v) => v === null || v === undefined ? '—' : Number(v).toLocaleString('es-ES') + ' €';
+const fmtDate = (v) => v ? new Date(v).toLocaleString('es-ES') : '—';
+const phone = (jid) => String(jid || '').split('@')[0];
+const roleName = (r) => ({0:'Admin',1:'Staff',2:'Cliente'})[r] ?? r;
+
+let toastTimer;
+function toast(msg, isError = false) {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.toggle('err', isError);
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+async function api(path, opts = {}) {
+  const res = await fetch('/admin/api' + path, {
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Request': '1' },
+    ...opts,
+  });
+  if (res.status === 401) { location.href = '/admin/login'; throw new Error('Sesión caducada'); }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.error?.message || 'Error de la API');
+  return data;
+}
+
+// --- Tema claro / oscuro ---------------------------------------------------
+const THEME_KEY = 'aibotia.theme';
+
+function currentTheme() {
+  return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+}
+
+function applyTheme(theme, persist = true) {
+  const light = theme === 'light';
+  document.documentElement.setAttribute('data-theme', light ? 'light' : 'dark');
+  const toggle = $('#themeToggle');
+  if (toggle) {
+    toggle.checked = light;
+    toggle.setAttribute('aria-checked', String(light));
+  }
+  document.querySelectorAll('.theme-ico').forEach((el) => {
+    el.classList.toggle('on', el.dataset.themeIcon === (light ? 'light' : 'dark'));
+  });
+  if (persist) {
+    try { localStorage.setItem(THEME_KEY, light ? 'light' : 'dark'); } catch (_) {}
+  }
+}
+
+const themeToggle = $('#themeToggle');
+if (themeToggle) {
+  themeToggle.addEventListener('change', () => applyTheme(themeToggle.checked ? 'light' : 'dark'));
+  applyTheme(currentTheme(), false);
+}
+window.addEventListener('storage', (e) => {
+  if (e.key === THEME_KEY) applyTheme(e.newValue === 'light' ? 'light' : 'dark', false);
+});
+
+const TABS = {
+  services: 'Services',
+  prompts: 'Prompts',
+  company: 'Company',
+  messages: 'Messages',
+  users: 'Users',
+  settings: 'Settings',
+  whatsapp: 'WhatsApp',
+};
+function switchTab(tab) {
+  for (const [key, id] of Object.entries(TABS)) {
+    $('#view' + id).classList.toggle('hidden', key !== tab);
+    $('#tab' + id).classList.toggle('active', key === tab);
+  }
+  if (tab === 'company') loadCompany().catch((e) => toast(e.message, true));
+  if (tab === 'messages') loadThreads().catch((e) => toast(e.message, true));
+  if (tab === 'users') loadUsers().catch((e) => toast(e.message, true));
+  if (tab === 'settings') loadSettings().catch((e) => toast(e.message, true));
+  if (tab === 'whatsapp') loadWhatsApp();
+}
+
+// --- Servicios -------------------------------------------------------------
+let servicesCache = [];
+
+async function loadServices() {
+  servicesCache = await api('/services');
+  const body = $('#servicesBody');
+  body.innerHTML = servicesCache.map((s) => `
+    <tr>
+      <td><code>${esc(s.id)}</code></td>
+      <td>${esc(s.category)}</td>
+      <td>${esc(s.name)}${s.note ? `<div class="muted">${esc(s.note)}</div>` : ''}</td>
+      <td class="muted">${esc(s.description) || '—'}</td>
+      <td>${fmtPrice(s.price)}</td>
+      <td>${s.duration_min ? esc(s.duration_min) + ' min' : '—'}</td>
+      <td>${esc((s.providers || []).join(', ')) || '—'}</td>
+      <td><span class="pill ${s.is_active ? 'on' : 'off'}">${s.is_active ? 'activo' : 'inactivo'}</span></td>
+      <td class="actions">
+        <button type="button" data-edit-service="${esc(s.id)}">Editar</button>
+        <button type="button" class="danger" data-del-service="${esc(s.id)}">Borrar</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="9" class="muted">Sin servicios</td></tr>';
+}
+
+function openServiceDialog(item) {
+  const d = $('#serviceDialog');
+  const f = $('#serviceForm');
+  f.reset();
+  $('#serviceError').textContent = '';
+  $('#serviceTitle').textContent = item ? 'Editar servicio' : 'Nuevo servicio';
+  f.dataset.mode = item ? 'edit' : 'create';
+  f.dataset.id = item ? item.id : '';
+  f.elements.id.disabled = !!item;
+  if (item) {
+    f.elements.id.value = item.id;
+    f.elements.category.value = item.category || '';
+    f.elements.name.value = item.name || '';
+    f.elements.description.value = item.description || '';
+    f.elements.price.value = item.price ?? '';
+    f.elements.duration_min.value = item.duration_min ?? '';
+    f.elements.providers.value = (item.providers || []).join(', ');
+    f.elements.sort_order.value = item.sort_order ?? 0;
+    f.elements.note.value = item.note || '';
+    f.elements.is_active.checked = item.is_active;
+  }
+  d.showModal();
+}
+
+$('#serviceForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = e.target;
+  const payload = {
+    id: f.elements.id.value.trim(),
+    category: f.elements.category.value.trim(),
+    name: f.elements.name.value.trim(),
+    description: f.elements.description.value.trim(),
+    price: f.elements.price.value === '' ? null : Number(f.elements.price.value),
+    duration_min: f.elements.duration_min.value === '' ? null : Number(f.elements.duration_min.value),
+    providers: f.elements.providers.value.split(',').map((x) => x.trim()).filter(Boolean),
+    sort_order: Number(f.elements.sort_order.value || 0),
+    note: f.elements.note.value.trim(),
+    is_active: f.elements.is_active.checked,
+  };
+  try {
+    const edit = f.dataset.mode === 'edit';
+    await api(edit ? '/services/' + encodeURIComponent(f.dataset.id) : '/services', {
+      method: edit ? 'PUT' : 'POST',
+      body: JSON.stringify(payload),
+    });
+    $('#serviceDialog').close();
+    await loadServices();
+    toast('Servicio guardado');
+  } catch (err) {
+    $('#serviceError').textContent = err.message;
+  }
+});
+
+$('#servicesBody').addEventListener('click', async (e) => {
+  const edit = e.target.closest('[data-edit-service]');
+  const del = e.target.closest('[data-del-service]');
+  if (edit) openServiceDialog(servicesCache.find((s) => s.id === edit.dataset.editService));
+  if (del) {
+    const id = del.dataset.delService;
+    if (!confirm('¿Borrar el servicio ' + id + '?')) return;
+    try {
+      await api('/services/' + encodeURIComponent(id), { method: 'DELETE' });
+      await loadServices();
+      toast('Servicio eliminado');
+    } catch (err) { toast(err.message, true); }
+  }
+});
+
+// --- Prompts ---------------------------------------------------------------
+let promptsCache = [];
+
+async function loadPrompts() {
+  promptsCache = (await api('/prompts')).filter((p) => p.code !== 'prompt_company');
+  const body = $('#promptsBody');
+  body.innerHTML = promptsCache.map((p) => `
+    <tr>
+      <td><code>${esc(p.code)}</code></td>
+      <td>${esc(p.name)}${p.description ? `<div class="muted">${esc(p.description)}</div>` : ''}</td>
+      <td><span class="pill ${p.is_active ? 'on' : 'off'}">${p.is_active ? 'activo' : 'inactivo'}</span></td>
+      <td>${fmtDate(p.updated_at)}</td>
+      <td class="actions">
+        <button type="button" data-edit-prompt="${esc(p.code)}">Editar</button>
+        <button type="button" data-history-prompt="${esc(p.code)}">Historial</button>
+        <button type="button" class="danger" data-del-prompt="${esc(p.code)}">Borrar</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="5" class="muted">Sin prompts</td></tr>';
+}
+
+async function openPromptDialog(code) {
+  const f = $('#promptForm');
+  f.reset();
+  $('#promptError').textContent = '';
+  f.dataset.mode = code ? 'edit' : 'create';
+  f.dataset.code = code || '';
+  f.elements.code.disabled = !!code;
+  $('#promptTitle').textContent = code ? 'Editar ' + code : 'Nuevo prompt';
+  if (code) {
+    const p = await api('/prompts/' + encodeURIComponent(code));
+    f.elements.code.value = p.code;
+    f.elements.name.value = p.name || '';
+    f.elements.description.value = p.description || '';
+    f.elements.content.value = p.content || '';
+    f.elements.is_active.checked = p.is_active;
+  }
+  $('#promptDialog').showModal();
+}
+
+$('#promptForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = e.target;
+  const payload = {
+    name: f.elements.name.value.trim(),
+    description: f.elements.description.value.trim(),
+    content: f.elements.content.value,
+    is_active: f.elements.is_active.checked,
+  };
+  try {
+    if (f.dataset.mode === 'edit') {
+      await api('/prompts/' + encodeURIComponent(f.dataset.code), { method: 'PUT', body: JSON.stringify(payload) });
+    } else {
+      payload.code = f.elements.code.value.trim();
+      await api('/prompts', { method: 'POST', body: JSON.stringify(payload) });
+    }
+    $('#promptDialog').close();
+    await loadPrompts();
+    toast('Prompt guardado y reindexado');
+  } catch (err) {
+    $('#promptError').textContent = err.message;
+  }
+});
+
+async function openVersions(code) {
+  const items = await api('/prompts/' + encodeURIComponent(code) + '/versions');
+  $('#versionsTitle').textContent = 'Historial · ' + code;
+  $('#versionsBody').innerHTML = items.map((v) => `
+    <div class="version">
+      <div style="min-width:150px">
+        <div>${fmtDate(v.created_at)}</div>
+        <div class="muted">${esc(v.name || '')}</div>
+      </div>
+      <pre>${esc((v.content || '').slice(0, 400))}</pre>
+      <button type="button" data-restore="${esc(code)}" data-version="${esc(v.id)}">Restaurar</button>
+    </div>`).join('') || '<p class="muted">Sin versiones</p>';
+  $('#versionsDialog').showModal();
+}
+
+$('#promptsBody').addEventListener('click', async (e) => {
+  const edit = e.target.closest('[data-edit-prompt]');
+  const history = e.target.closest('[data-history-prompt]');
+  const del = e.target.closest('[data-del-prompt]');
+  try {
+    if (edit) await openPromptDialog(edit.dataset.editPrompt);
+    if (history) await openVersions(history.dataset.historyPrompt);
+    if (del) {
+      const code = del.dataset.delPrompt;
+      if (!confirm('¿Borrar el prompt ' + code + '? Se eliminará también su historial.')) return;
+      await api('/prompts/' + encodeURIComponent(code), { method: 'DELETE' });
+      await loadPrompts();
+      toast('Prompt eliminado');
+    }
+  } catch (err) { toast(err.message, true); }
+});
+
+$('#versionsBody').addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-restore]');
+  if (!btn) return;
+  if (!confirm('¿Restaurar esta versión? Se creará una nueva versión con su contenido.')) return;
+  try {
+    await api('/prompts/' + encodeURIComponent(btn.dataset.restore) + '/versions/' + btn.dataset.version, { method: 'POST' });
+    $('#versionsDialog').close();
+    await loadPrompts();
+    if (btn.dataset.restore === 'prompt_company') await loadCompany().catch(() => {});
+    toast('Versión restaurada y reindexada');
+  } catch (err) { toast(err.message, true); }
+});
+
+// --- Empresa ---------------------------------------------------------------
+let companyPrompt = null;
+
+async function loadCompany() {
+  companyPrompt = await api('/prompts/prompt_company');
+  const ta = $('#companyContent');
+  ta.value = companyPrompt.content || '';
+  ta.dataset.original = ta.value;
+  $('#companyError').textContent = '';
+}
+
+$('#companySave').addEventListener('click', async () => {
+  if (!companyPrompt) return;
+  const btn = $('#companySave');
+  btn.disabled = true;
+  try {
+    await api('/prompts/prompt_company', {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: companyPrompt.name || 'Datos de empresa',
+        description: companyPrompt.description || '',
+        content: $('#companyContent').value,
+        is_active: true,
+      }),
+    });
+    await loadCompany();
+    toast('Datos de empresa guardados y aplicados');
+  } catch (err) {
+    $('#companyError').textContent = err.message;
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+$('#companyContent').addEventListener('input', () => {
+  $('#companySave').disabled = false;
+});
+
+$('#companyHistory').addEventListener('click', () => {
+  openVersions('prompt_company').catch((e) => toast(e.message, true));
+});
+
+// --- Mensajes --------------------------------------------------------------
+let threadsPage = 1, threadsLastPage = 1, activeThread = null, threadsCache = [];
+let threadsReloadTimer;
+
+async function loadThreads(page = 1) {
+  threadsPage = page;
+  const search = $('#messageSearch').value.trim();
+  const needsOperator = $('#threadOperator').value;
+  const ai = $('#threadAI').value;
+  const params = new URLSearchParams({ page: String(page), perPage: '25' });
+  if (search) params.set('search', search);
+  if (needsOperator) params.set('needs_operator', '1');
+  if (ai) params.set('ai', ai);
+  const res = await api('/messages?' + params.toString());
+  threadsCache = res.data || [];
+  threadsLastPage = res.meta.lastPage || 1;
+  renderThreads();
+}
+
+function renderThreads() {
+  const search = $('#messageSearch').value.trim();
+  const needsOperator = $('#threadOperator').value;
+  const ai = $('#threadAI').value;
+  const scroller = document.querySelector('.threads');
+  const scrollTop = scroller ? scroller.scrollTop : 0;
+  const body = $('#threadsBody');
+  body.innerHTML = threadsCache.map((t) => {
+    const typing = isTyping(t.user_id);
+    const preview = typing ? 'escribiendo…' : (t.user_message || t.ai_response || '…');
+    return `
+    <div class="thread ${activeThread === t.user_id ? 'active' : ''} ${t.needs_operator ? 'needs-op' : ''}" data-thread="${esc(t.user_id)}">
+      <div class="t-row">
+        <div class="t-name">${esc(t.name || phone(t.user_id))}${t.needs_operator ? '<span class="op-dot" title="El bot ha derivado la conversación al equipo"></span>' : ''}</div>
+        <label class="switch" title="${t.active ? 'IA activa' : 'IA inactiva'}">
+          <input type="checkbox" data-active-user="${esc(t.user_id)}" ${t.active ? 'checked' : ''}>
+          <span class="slider"></span>
+        </label>
+      </div>
+      ${t.needs_operator ? '<span class="op-badge">⚠ Requiere operador</span>' : ''}
+      <div class="t-preview${typing ? ' typing' : ''}">${esc(preview)}</div>
+      <div class="t-time">${fmtDate(t.created_at)}</div>
+    </div>`;
+  }).join('') || `<div class="muted" style="padding:14px">${
+    search ? 'Sin resultados para «' + esc(search) + '»'
+      : (needsOperator || ai) ? 'Sin conversaciones con esos filtros' : 'Sin conversaciones'}</div>`;
+  if (scroller) scroller.scrollTop = scrollTop;
+  $('#threadsPager').innerHTML = `
+    <button type="button" id="prevThreads" ${threadsPage <= 1 ? 'disabled' : ''}>Anterior</button>
+    <span class="muted">${threadsPage} / ${threadsLastPage}</span>
+    <button type="button" id="nextThreads" ${threadsPage >= threadsLastPage ? 'disabled' : ''}>Siguiente</button>`;
+  $('#prevThreads').addEventListener('click', () => loadThreads(threadsPage - 1));
+  $('#nextThreads').addEventListener('click', () => loadThreads(threadsPage + 1));
+}
+
+// Recarga la bandeja con un pequeño debounce tras un evento en vivo.
+function refreshThreadsSoon() {
+  if ($('#viewMessages').classList.contains('hidden')) return;
+  clearTimeout(threadsReloadTimer);
+  threadsReloadTimer = setTimeout(() => {
+    loadThreads(threadsPage).catch(() => {});
+  }, 350);
+}
+
+// --- Realtime (SSE): mensajes en vivo ---------------------------------------
+let convRows = [];            // filas persistidas, de más antigua a más reciente
+let convSeen = new Set();     // ids de fila ya pintados
+let pendingIncoming = [];     // mensajes del cliente aún sin fila persistida
+let convSeq = 0;
+const typingUsers = new Map(); // user_id -> timer de expiración
+let liveSource = null, liveOpened = false;
+
+function isTyping(userID) { return typingUsers.has(userID); }
+
+function markTyping(userID, typing) {
+  const prev = typingUsers.get(userID);
+  if (prev) clearTimeout(prev);
+  if (typing) {
+    typingUsers.set(userID, setTimeout(() => {
+      if (!typingUsers.has(userID)) return;
+      typingUsers.delete(userID);
+      if (userID === activeThread) renderConversation();
+      refreshThreadsSoon();
+    }, 15000));
+    if (userID === activeThread) renderConversation();
+  } else {
+    typingUsers.delete(userID);
+    if (userID === activeThread) renderConversation();
+    refreshThreadsSoon();
+  }
+}
+
+const BOT_SENDER = 'Asistente Virtual';
+
+// WhatsApp antepone "*Asistente Virtual*" al texto del bot y "*Operador*" al de
+// las respuestas manuales, pero la BD guarda la respuesta del bot sin prefijo.
+// Aquí separamos ese encabezado para mostrarlo como remitente en la burbuja,
+// igual que se ve en WhatsApp.
+function bubbleContent(m) {
+  let text = String(m.ai_response || '');
+  let sender = m.model === 'manual' ? 'Operador' : BOT_SENDER;
+  if (m.model === 'manual') {
+    const match = text.match(/^\*([^*\n]{1,40})\*\s*\n+/);
+    if (match) {
+      sender = match[1];
+      text = text.slice(match[0].length);
+    }
+  } else if (text.startsWith('*' + BOT_SENDER + '*')) {
+    text = text.slice(('*' + BOT_SENDER + '*').length).replace(/^\s*\n+/, '');
+  }
+  return { sender, text };
+}
+
+function renderConversation(forceBottom = false) {
+  const el = $('#convBody');
+  if (!el) return;
+  const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 80;
+  const bubbles = [];
+  for (const m of convRows) {
+    if (m.user_message) {
+      bubbles.push(`<div class="bubble from" data-msg="u${esc(m.id)}">${esc(m.user_message)}<span class="b-meta">Cliente · ${fmtDate(m.created_at)}</span></div>`);
+    }
+    if (m.ai_response) {
+      const { sender, text } = bubbleContent(m);
+      bubbles.push(`<div class="bubble to" data-msg="a${esc(m.id)}"><span class="b-sender">${esc(sender)}</span>${esc(text)}<span class="b-meta">${fmtDate(m.created_at)}</span></div>`);
+    }
+  }
+  for (const p of pendingIncoming) {
+    bubbles.push(`<div class="bubble from pending" data-pending="${esc(p.key)}">${esc(p.text)}<span class="b-meta">Cliente · ${fmtDate(p.at)}</span></div>`);
+  }
+  if (activeThread && isTyping(activeThread)) {
+    bubbles.push('<div class="typing-bubble" title="Escribiendo…" aria-label="Escribiendo"><span></span><span></span><span></span></div>');
+  }
+  el.innerHTML = bubbles.join('') || '<div class="muted">Sin mensajes</div>';
+  if (forceBottom || nearBottom) el.scrollTop = el.scrollHeight;
+}
+
+function touchThread(ev, text) {
+  const t = threadsCache.find((x) => x.user_id === ev.user_id);
+  if (!t) return;
+  t.user_message = text;
+  t.ai_response = '';
+  t.created_at = ev.at;
+  threadsCache = [t, ...threadsCache.filter((x) => x !== t)];
+  renderThreads();
+}
+
+function appendIncoming(ev) {
+  const d = ev.data || {};
+  if (d.from_me) return;
+  const raw = String(d.text || '').trim();
+  const text = raw || (d.has_media ? '📎 ' + (d.media_type || 'archivo') : '');
+  if (!text) return;
+  touchThread(ev, text);
+  if (ev.user_id === activeThread) {
+    pendingIncoming.push({ key: String(ev.at || Date.now()) + '-' + pendingIncoming.length, text, at: ev.at });
+    renderConversation();
+  }
+}
+
+function appendMessage(ev) {
+  const row = ev.data || {};
+  if (!row.id || !row.user_id) return;
+  if (row.user_id !== activeThread) return;
+  // La interacción persistida sustituye a los mensajes pendientes del cliente.
+  pendingIncoming = [];
+  if (!convSeen.has(row.id)) {
+    convSeen.add(row.id);
+    convRows.push(row);
+    convRows.sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
+  }
+  markTyping(row.user_id, false);
+  renderConversation();
+}
+
+function handleLiveEvent(ev) {
+  if (!ev || !ev.user_id) return;
+  if (ev.type === 'incoming') appendIncoming(ev);
+  else if (ev.type === 'message') appendMessage(ev);
+  else if (ev.type === 'typing') markTyping(ev.user_id, !!(ev.data && ev.data.typing));
+  refreshThreadsSoon();
+}
+
+function setLive(state) {
+  const el = $('#liveBadge');
+  if (!el) return;
+  el.classList.remove('online', 'offline');
+  if (state === 'online') {
+    el.classList.add('online');
+    el.textContent = 'En vivo';
+    el.title = 'Conectado en tiempo real';
+  } else if (state === 'offline') {
+    el.classList.add('offline');
+    el.textContent = 'Reconectando…';
+    el.title = 'Sin conexión en tiempo real; reintentando';
+  } else {
+    el.textContent = 'Conectando…';
+    el.title = 'Conectando…';
+  }
+}
+
+function connectLive() {
+  if (!window.EventSource) {
+    setLive('offline');
+    return;
+  }
+  if (liveSource) liveSource.close();
+  setLive('connecting');
+  const es = new EventSource('/admin/api/events');
+  liveSource = es;
+  es.onopen = () => {
+    setLive('online');
+    if (liveOpened) {
+      // Tras una reconexión, resincroniza para no perder eventos.
+      loadThreads(threadsPage).catch(() => {});
+      if (activeThread) openConversation(activeThread).catch(() => {});
+    }
+    liveOpened = true;
+  };
+  es.onerror = () => setLive('offline');
+  es.addEventListener('incoming', (e) => { try { handleLiveEvent(JSON.parse(e.data)); } catch (_) {} });
+  es.addEventListener('message', (e) => { try { handleLiveEvent(JSON.parse(e.data)); } catch (_) {} });
+  es.addEventListener('typing', (e) => { try { handleLiveEvent(JSON.parse(e.data)); } catch (_) {} });
+}
+
+
+// --- Resumen para el operador ----------------------------------------------
+const APPT_STATUS = {
+  idle: 'Sin cita',
+  pending_service: 'Pendiente de servicio',
+  pending_availability: 'Pendiente de horario',
+  ready: 'Lista para confirmar',
+  finish: 'Confirmada',
+  cancel: 'Cancelada',
+};
+let summaryOpen = true;
+try { summaryOpen = localStorage.getItem('aibotia.summaryOpen') !== '0'; } catch (_) {}
+let summarySeq = 0;
+
+function setSummaryOpen(open) {
+  summaryOpen = open;
+  $('#convSummary').classList.toggle('collapsed', !open);
+  try { localStorage.setItem('aibotia.summaryOpen', open ? '1' : '0'); } catch (_) {}
+}
+
+function prettyTopic(code) {
+  return String(code || '').replace(/^prompt_/, '').replace(/_/g, ' ').trim();
+}
+
+async function loadSummary(userID) {
+  const seq = ++summarySeq;
+  const card = $('#convSummary');
+  card.classList.remove('hidden');
+  card.classList.toggle('collapsed', !summaryOpen);
+  $('#summarySource').textContent = '';
+  $('#summaryBody').innerHTML = '<div class="summary-loading">Analizando los últimos mensajes…</div>';
+  try {
+    const s = await api('/messages/' + encodeURIComponent(userID) + '/summary');
+    if (seq !== summarySeq || activeThread !== userID) return;
+    renderSummary(s);
+  } catch (err) {
+    if (seq !== summarySeq) return;
+    $('#summaryBody').innerHTML = '<div class="muted">No se pudo generar el resumen.</div>';
+  }
+}
+
+function renderSummary(s) {
+  const chips = [];
+  if (s.topic) chips.push(`<span class="chip"><b>Tema</b>${esc(prettyTopic(s.topic))}</span>`);
+  if (s.appointment) {
+    const a = s.appointment;
+    const service = a.service_name || a.service;
+    if (service) chips.push(`<span class="chip"><b>Servicio</b>${esc(service)}</span>`);
+    if (a.availability) chips.push(`<span class="chip"><b>Horario</b>${esc(a.availability)}</span>`);
+    const status = APPT_STATUS[a.status] || a.status;
+    if (status) chips.push(`<span class="chip ${a.status === 'ready' ? 'ok' : ''}"><b>Cita</b>${esc(status)}</span>`);
+    if (a.team) chips.push('<span class="chip"><b>Atiende</b>equipo</span>');
+  } else {
+    chips.push('<span class="chip"><b>Cita</b>sin datos todavía</span>');
+  }
+  if (s.needs_operator) chips.push(`<span class="chip warn"><b>⚠</b>${esc(s.handoff_reason || 'Requiere operador')}</span>`);
+  const points = (s.points || []).map((p) => `<li>${esc(p)}</li>`).join('');
+  $('#summaryBody').innerHTML = `
+    <div class="summary-chips">${chips.join('')}</div>
+    ${points ? `<ul class="summary-points">${points}</ul>` : '<div class="muted">Sin mensajes suficientes para resumir.</div>'}`;
+  $('#summarySource').textContent = s.source === 'ai' ? 'IA' : 'básico';
+}
+
+$('#summaryToggle').addEventListener('click', () => setSummaryOpen(!summaryOpen));
+
+async function openConversation(userID) {
+  const seq = ++convSeq;
+  activeThread = userID;
+  document.querySelectorAll('.thread').forEach((el) => el.classList.toggle('active', el.dataset.thread === userID));
+  const res = await api('/messages/' + encodeURIComponent(userID));
+  if (seq !== convSeq || activeThread !== userID) return;
+  const name = res.user?.name || res.user?.alias || phone(userID);
+  const pending = threadsCache.find((t) => t.user_id === userID)?.needs_operator || false;
+  $('#convHead').innerHTML = `<strong>${esc(name)}</strong><code>${esc(phone(userID))}</code>` +
+    (res.user ? `<span class="pill ${res.user.active ? 'on' : 'off'}">${res.user.active ? 'IA activa' : 'IA inactiva'}</span>` : '') +
+    (res.user?.test_mode ? '<span class="pill" title="El bot no se desactiva al derivar a un operador mientras dure la prueba">🧪 Modo prueba</span>' : '') +
+    (pending ? '<span class="pill op">⚠ Requiere operador</span>' : '');
+  convRows = (res.conversation || []).slice().reverse();
+  convSeen = new Set(convRows.map((m) => m.id));
+  pendingIncoming = [];
+  renderConversation(true);
+  closePanels();
+  updateReplyState();
+  loadSummary(userID);
+}
+
+connectLive();
+
+$('#threadsBody').addEventListener('click', (e) => {
+  if (e.target.closest('.switch')) return;
+  const t = e.target.closest('[data-thread]');
+  if (t) openConversation(t.dataset.thread).catch((err) => toast(err.message, true));
+});
+
+$('#threadsBody').addEventListener('change', async (e) => {
+  const input = e.target.closest('input[data-active-user]');
+  if (!input) return;
+  const id = input.dataset.activeUser;
+  const active = input.checked;
+  try {
+    await api('/users/' + encodeURIComponent(id) + '/active', { method: 'POST', body: JSON.stringify({ active }) });
+    input.closest('.switch')?.setAttribute('title', active ? 'IA activa' : 'IA inactiva');
+    if (activeThread === id) {
+      const pill = $('#convHead .pill');
+      if (pill) {
+        pill.className = 'pill ' + (active ? 'on' : 'off');
+        pill.textContent = active ? 'IA activa' : 'IA inactiva';
+      }
+    }
+    toast(active ? 'IA activada' : 'IA desactivada');
+  } catch (err) {
+    input.checked = !active;
+    toast(err.message, true);
+  }
+});
+
+// --- Composer del chat: emojis y respuestas rápidas ------------------------
+const EMOJI_GROUPS = [
+  { name: 'Frecuentes', emojis: ['😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡','👍','👎','🙏','👏','🙌','💪','❤️','💕','🔥','✨','🎉','✅','❌','⏰','📅'] },
+  { name: 'Caras', emojis: ['😃','😄','😆','😉','😋','😛','😜','🤪','🤨','🧐','🤓','😏','😒','😞','😔','😟','😕','🙁','😣','😖','😫','😩','🥺','😤','😠','🤬','😱','😨','😰','😥','😓','🤗','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕'] },
+  { name: 'Gestos', emojis: ['👍','👎','👌','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','✋','🤚','🖐️','🖖','👋','🤝','🙏','💪','🦾'] },
+  { name: 'Objetos', emojis: ['📅','📆','🗓️','⏰','⏱️','📱','💻','📞','✉️','📧','📍','🏠','🏢','💳','💰','💶','🎁','🛍️','⭐','🌟','💫','✨','🔥','✅','✔️','❌','❎','⚠️','💡','📌','📎','🔗','📝','✏️','📄'] },
+  { name: 'Naturaleza', emojis: ['🌸','🌺','🌻','🌹','🌷','🌼','🍀','🌿','🌱','🌳','🌴','🌵','🌞','🌝','🌙','⭐','🌈','☀️','🌤️','☁️','🌧️','❄️'] },
+];
+
+const QUICK_KEY = 'aibotia.quickReplies';
+const DEFAULT_QUICK_REPLIES = [
+  '¡Hola! Gracias por escribirnos, ¿en qué podemos ayudarte?',
+  'Un momento, por favor. Estamos revisando tu consulta.',
+  'Te confirmamos la disponibilidad en breve.',
+  'Puedes ver todos nuestros servicios y precios en la web.',
+];
+
+function loadQuickReplies() {
+  try {
+    const raw = localStorage.getItem(QUICK_KEY);
+    if (!raw) return DEFAULT_QUICK_REPLIES.slice();
+    const list = JSON.parse(raw);
+    if (!Array.isArray(list)) return DEFAULT_QUICK_REPLIES.slice();
+    const clean = list.filter((x) => typeof x === 'string' && x.trim());
+    return clean.length ? clean : DEFAULT_QUICK_REPLIES.slice();
+  } catch (_) {
+    return DEFAULT_QUICK_REPLIES.slice();
+  }
+}
+let quickReplies = loadQuickReplies();
+
+function saveQuickReplies() {
+  try { localStorage.setItem(QUICK_KEY, JSON.stringify(quickReplies)); } catch (_) {}
+}
+
+function renderEmojiPanel() {
+  $('#emojiPanel').innerHTML = EMOJI_GROUPS.map((g) => `
+    <div class="emoji-group">
+      <h4>${esc(g.name)}</h4>
+      <div class="emoji-grid">${g.emojis.map((e) => `<button type="button" data-emoji="${esc(e)}">${e}</button>`).join('')}</div>
+    </div>`).join('');
+}
+
+function renderQuickPanel() {
+  const items = quickReplies.map((q, i) => `
+    <div class="quick-item">
+      <button type="button" class="quick-use" data-quick-use="${i}">${esc(q)}</button>
+      <button type="button" class="quick-del" data-quick-del="${i}" title="Eliminar">✕</button>
+    </div>`).join('') || '<p class="muted" style="margin:0 0 8px">Sin respuestas rápidas guardadas</p>';
+  $('#quickPanel').innerHTML = `
+    <div class="panel-head"><strong>Respuestas rápidas</strong><div class="spacer"></div><span class="reply-hint">Se guardan en este navegador</span></div>
+    <div class="quick-list">${items}</div>
+    <div class="quick-add">
+      <input id="quickNew" placeholder="Nueva respuesta rápida…" maxlength="500" autocomplete="off">
+      <button type="button" id="quickAdd">Añadir</button>
+    </div>`;
+}
+
+function addQuickReply() {
+  const input = $('#quickNew');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  quickReplies.push(text);
+  saveQuickReplies();
+  renderQuickPanel();
+  $('#quickNew').focus();
+}
+
+function removeQuickReply(index) {
+  if (!Number.isInteger(index) || index < 0 || index >= quickReplies.length) return;
+  quickReplies.splice(index, 1);
+  saveQuickReplies();
+  renderQuickPanel();
+}
+
+function setPanel(which) {
+  $('#emojiPanel').classList.toggle('hidden', which !== 'emoji');
+  $('#quickPanel').classList.toggle('hidden', which !== 'quick');
+  $('#emojiBtn').classList.toggle('active', which === 'emoji');
+  $('#quickBtn').classList.toggle('active', which === 'quick');
+}
+function closePanels() { setPanel(null); }
+
+function autoGrow(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+}
+
+function insertAtCursor(el, text) {
+  const start = el.selectionStart ?? el.value.length;
+  const end = el.selectionEnd ?? el.value.length;
+  el.value = el.value.slice(0, start) + text + el.value.slice(end);
+  el.selectionStart = el.selectionEnd = start + text.length;
+  el.focus();
+  autoGrow(el);
+}
+
+function updateReplyState() {
+  $('#replyBtn').disabled = !activeThread || !$('#replyText').value.trim();
+}
+
+$('#emojiBtn').addEventListener('click', () => {
+  setPanel($('#emojiPanel').classList.contains('hidden') ? 'emoji' : null);
+});
+$('#quickBtn').addEventListener('click', () => {
+  setPanel($('#quickPanel').classList.contains('hidden') ? 'quick' : null);
+});
+
+$('#emojiPanel').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const btn = e.target.closest('[data-emoji]');
+  if (!btn) return;
+  insertAtCursor($('#replyText'), btn.dataset.emoji);
+  updateReplyState();
+});
+
+$('#quickPanel').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const use = e.target.closest('[data-quick-use]');
+  const del = e.target.closest('[data-quick-del]');
+  if (use) {
+    insertAtCursor($('#replyText'), quickReplies[Number(use.dataset.quickUse)] || '');
+    updateReplyState();
+    closePanels();
+  } else if (del) {
+    removeQuickReply(Number(del.dataset.quickDel));
+  } else if (e.target.closest('#quickAdd')) {
+    addQuickReply();
+  }
+});
+
+$('#quickPanel').addEventListener('keydown', (e) => {
+  if (e.target.id === 'quickNew' && e.key === 'Enter' && !e.isComposing) {
+    e.preventDefault();
+    addQuickReply();
+  }
+});
+
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#emojiPanel') || e.target.closest('#quickPanel') ||
+      e.target.closest('#emojiBtn') || e.target.closest('#quickBtn')) return;
+  closePanels();
+});
+
+$('#replyText').addEventListener('input', () => {
+  autoGrow($('#replyText'));
+  updateReplyState();
+});
+
+$('#replyText').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+    e.preventDefault();
+    if (!$('#replyBtn').disabled) $('#replyForm').requestSubmit();
+  }
+});
+
+$('#replyForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!activeThread) return;
+  const input = $('#replyText');
+  const text = input.value.trim();
+  if (!text) return;
+  $('#replyBtn').disabled = true;
+  try {
+    await api('/messages/' + encodeURIComponent(activeThread) + '/send', { method: 'POST', body: JSON.stringify({ text }) });
+    input.value = '';
+    autoGrow(input);
+    closePanels();
+    await openConversation(activeThread);
+    await loadThreads(threadsPage);
+    toast('Mensaje enviado');
+  } catch (err) {
+    toast(err.message, true);
+  } finally {
+    updateReplyState();
+  }
+});
+
+$('#refreshMessages').addEventListener('click', () => loadThreads(threadsPage));
+$('#threadOperator').addEventListener('change', () => loadThreads(1).catch((e) => toast(e.message, true)));
+$('#threadAI').addEventListener('change', () => loadThreads(1).catch((e) => toast(e.message, true)));
+$('#messageSearchBtn').addEventListener('click', () => loadThreads(1).catch((e) => toast(e.message, true)));
+$('#messageSearch').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    loadThreads(1).catch((err) => toast(err.message, true));
+  }
+});
+let messageSearchTimer;
+$('#messageSearch').addEventListener('input', () => {
+  clearTimeout(messageSearchTimer);
+  messageSearchTimer = setTimeout(() => loadThreads(1).catch((e) => toast(e.message, true)), 300);
+});
+
+// --- Usuarios --------------------------------------------------------------
+let usersPage = 1, usersLastPage = 1, usersCache = [], usersAI = '';
+
+function setUsersAI(value) {
+  usersAI = value || '';
+  document.querySelectorAll('#userAIFilter button').forEach((b) => {
+    b.classList.toggle('active', (b.dataset.ai || '') === usersAI);
+  });
+}
+
+async function loadUsers(page = 1, search = '') {
+  usersPage = page;
+  const q = search !== '' ? '&search=' + encodeURIComponent(search) : '';
+  const ai = usersAI !== '' ? '&ai=' + encodeURIComponent(usersAI) : '';
+  const res = await api('/users?page=' + page + '&perPage=20' + q + ai);
+  usersCache = res.data;
+  usersLastPage = res.meta.lastPage || 1;
+  const body = $('#usersBody');
+  body.innerHTML = usersCache.map((u) => `
+    <tr>
+      <td><code>${esc(u.id)}</code></td>
+      <td>${esc(u.name)}</td>
+      <td>${esc(u.alias)}</td>
+      <td><span class="pill ${u.active ? 'on' : 'off'}">${u.active ? 'sí' : 'no'}</span></td>
+      <td>${esc(roleName(u.role))}</td>
+      <td>${esc(u.topic)}</td>
+      <td>${esc(u.lang)}</td>
+      <td class="actions">
+        <button type="button" data-edit-user="${esc(u.id)}">Editar</button>
+        <button type="button" class="danger" data-del-user="${esc(u.id)}">Borrar</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="8" class="muted">Sin usuarios</td></tr>';
+  $('#usersPager').innerHTML = `
+    <button type="button" id="prevUsers" ${page <= 1 ? 'disabled' : ''}>Anterior</button>
+    <span class="muted">${page} / ${usersLastPage}</span>
+    <button type="button" id="nextUsers" ${page >= usersLastPage ? 'disabled' : ''}>Siguiente</button>`;
+  $('#prevUsers').addEventListener('click', () => loadUsers(page - 1, $('#userSearch').value));
+  $('#nextUsers').addEventListener('click', () => loadUsers(page + 1, $('#userSearch').value));
+}
+
+function openUserDialog(item) {
+  const d = $('#userDialog');
+  const f = $('#userForm');
+  f.reset();
+  $('#userError').textContent = '';
+  $('#userTitle').textContent = item ? 'Editar usuario' : 'Nuevo usuario';
+  f.dataset.mode = item ? 'edit' : 'create';
+  f.dataset.id = item ? item.id : '';
+  f.elements.id.disabled = !!item;
+  if (item) {
+    f.elements.id.value = item.id;
+    f.elements.name.value = item.name || '';
+    f.elements.alias.value = item.alias || '';
+    f.elements.lang.value = item.lang || '';
+    f.elements.topic.value = item.topic || '';
+    f.elements.role.value = item.role ?? 2;
+    f.elements.buffer_time.value = item.buffer_time ?? 30000;
+    f.elements.temperature.value = item.temperature ?? 0.5;
+    f.elements.active.checked = item.active;
+  } else {
+    f.elements.role.value = '2';
+    f.elements.buffer_time.value = '30000';
+    f.elements.temperature.value = '0.5';
+    f.elements.active.checked = true;
+  }
+  d.showModal();
+}
+
+$('#userForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = e.target;
+  const payload = {
+    id: f.elements.id.value.trim(),
+    name: f.elements.name.value.trim(),
+    alias: f.elements.alias.value.trim(),
+    lang: f.elements.lang.value.trim(),
+    topic: f.elements.topic.value.trim(),
+    role: Number(f.elements.role.value),
+    buffer_time: Number(f.elements.buffer_time.value || 0),
+    temperature: Number(f.elements.temperature.value || 0),
+    active: f.elements.active.checked,
+  };
+  try {
+    if (f.dataset.mode === 'edit') {
+      await api('/users/' + encodeURIComponent(f.dataset.id), { method: 'PUT', body: JSON.stringify(payload) });
+    } else {
+      await api('/users', { method: 'POST', body: JSON.stringify(payload) });
+    }
+    $('#userDialog').close();
+    await loadUsers(usersPage, $('#userSearch').value);
+    toast('Usuario guardado');
+  } catch (err) {
+    $('#userError').textContent = err.message;
+  }
+});
+
+$('#usersBody').addEventListener('click', async (e) => {
+  const edit = e.target.closest('[data-edit-user]');
+  const del = e.target.closest('[data-del-user]');
+  if (edit) openUserDialog(usersCache.find((u) => u.id === edit.dataset.editUser));
+  if (del) {
+    const id = del.dataset.delUser;
+    if (!confirm('¿Borrar el usuario ' + id + '?\n\nSe eliminarán TODOS sus datos: conversaciones, citas, historial y caché de WhatsApp. Esta acción no se puede deshacer.')) return;
+    try {
+      const res = await api('/users/' + encodeURIComponent(id), { method: 'DELETE' });
+      await loadUsers(usersPage, $('#userSearch').value);
+      toast('Usuario eliminado · ' + (res.messages || 0) + ' mensajes · ' + (res.appointments || 0) + ' citas');
+    } catch (err) { toast(err.message, true); }
+  }
+});
+
+$('#userSearchBtn').addEventListener('click', () => loadUsers(1, $('#userSearch').value));
+$('#userSearch').addEventListener('keydown', (e) => { if (e.key === 'Enter') loadUsers(1, $('#userSearch').value); });
+document.querySelectorAll('#userAIFilter button').forEach((b) => b.addEventListener('click', () => {
+  setUsersAI(b.dataset.ai);
+  loadUsers(1, $('#userSearch').value).catch((e) => toast(e.message, true));
+}));
+$('#importContacts').addEventListener('click', async () => {
+  try {
+    const res = await api('/users/import', { method: 'POST', body: '{}' });
+    await loadUsers(1, $('#userSearch').value);
+    toast(res.imported ? res.imported + ' contactos importados' : 'No hay contactos nuevos');
+  } catch (err) { toast(err.message, true); }
+});
+
+// --- Ajustes ---------------------------------------------------------------
+let settingsCache = { activate_new_users: true };
+
+function applySettings(s) {
+  settingsCache = s || settingsCache;
+  const input = $('#activateNewUsers');
+  input.checked = !!settingsCache.activate_new_users;
+  $('#activateNewUsersSwitch').title = input.checked
+    ? 'Activado: el bot responde a los usuarios nuevos'
+    : 'Desactivado: los usuarios nuevos entran con la IA en espera';
+}
+
+async function loadSettings() {
+  applySettings(await api('/settings'));
+}
+
+applySettings(settingsCache);
+
+$('#activateNewUsers').addEventListener('change', async (e) => {
+  const input = e.target;
+  const value = input.checked;
+  input.disabled = true;
+  try {
+    applySettings(await api('/settings', { method: 'PUT', body: JSON.stringify({ activate_new_users: value }) }));
+    toast(value ? 'Bot activado para nuevos usuarios' : 'Bot desactivado para nuevos usuarios');
+  } catch (err) {
+    input.checked = !value;
+    toast(err.message, true);
+  } finally {
+    input.disabled = false;
+  }
+});
+
+// --- WhatsApp --------------------------------------------------------------
+let waTimer;
+async function loadWhatsApp() {
+  let st;
+  try {
+    st = await api('/whatsapp');
+  } catch (err) {
+    $('#waCard').innerHTML = '<div class="muted">No se pudo leer el estado</div>';
+    return;
+  }
+  const status = st.status;
+  const pill = status === 'connected' ? '<span class="pill on">conectado</span>'
+    : status === 'waiting_qr' ? '<span class="pill off">esperando QR</span>'
+    : status === 'logged_out' ? '<span class="pill off">sesión cerrada</span>'
+    : '<span class="pill off">desconectado</span>';
+  let html = `<div class="wa-status">WhatsApp ${pill}</div><div class="muted">Estado: ${esc(status)}</div>`;
+  if (st.qr_available && status !== 'connected') {
+    html += `<div class="wa-qr"><img src="/admin/api/whatsapp/qr.png?t=${Date.now()}" width="280" height="280" alt="QR">
+      <p>Abre WhatsApp en el móvil → Ajustes → Dispositivos vinculados → Vincular dispositivo y escanea este código.</p></div>`;
+  } else if (status === 'connected') {
+    html += '<div class="muted" style="margin-top:10px">El dispositivo está vinculado y operativo.</div>';
+  } else {
+    html += '<div class="muted" style="margin-top:10px">No hay QR disponible. Reinicia el bot si necesitas vincular un nuevo dispositivo.</div>';
+  }
+  $('#waCard').innerHTML = html;
+}
+
+// --- Eventos ---------------------------------------------------------------
+$('#tabServices').addEventListener('click', () => switchTab('services'));
+$('#tabPrompts').addEventListener('click', () => switchTab('prompts'));
+$('#tabCompany').addEventListener('click', () => switchTab('company'));
+$('#tabMessages').addEventListener('click', () => switchTab('messages'));
+$('#tabUsers').addEventListener('click', () => switchTab('users'));
+$('#tabSettings').addEventListener('click', () => switchTab('settings'));
+$('#tabWhatsApp').addEventListener('click', () => switchTab('whatsapp'));
+$('#newService').addEventListener('click', () => openServiceDialog(null));
+$('#newPrompt').addEventListener('click', () => openPromptDialog(null).catch((e) => toast(e.message, true)));
+$('#newUser').addEventListener('click', () => openUserDialog(null));
+document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => $('#' + b.dataset.close).close()));
+
+renderEmojiPanel();
+renderQuickPanel();
+autoGrow($('#replyText'));
+updateReplyState();
+
+(async () => {
+  try {
+    await Promise.all([loadServices(), loadPrompts()]);
+  } catch (err) { toast(err.message, true); }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+[
+    {
+        "code": "message_appointment_review",
+        "name": "Solicitud de repaso de cita",
+        "type": "fix_message",
+        "description": "El mensaje es sobre un repaso de cualquier nanopigmentacion o micro de cualquier zona.",
+        "content": "Cuando puedas, envíanos por favor un video sin nada de maquillaje en las cejas, con buena iluminación y apartando los pelitos para poder evaluar la necesidad de repaso ☺️",
+        "actions": [
+            "fix_chat"
+        ],
+        "attachments": []
+    },
+    {
+        "code": "appointment_cancelled",
+        "type": "fix_message",
+        "description": "El usuario solicita cancelar una cita.",
+        "content": "🗓️ Un miembro del equipo te atenderá a la mayor brevedad posible para gestionar la cancelación. \n Gracias 😊",
+        "actions": [
+            "fix_chat"
+        ],
+        "attachments": []
+    },
+    {
+        "code": "message_request_file_send",
+        "name": "Solicitud de envío de archivo",
+        "type": "fix_message",
+        "description": "El usuario solicita que le envíen cualquier archivo, foto o documento.",
+        "content": "🗓️ Un miembro del equipo te atenderá a la mayor brevedad posible.",
+        "actions": [
+            "fix_chat"
+        ],
+        "attachments": []
+    },
+    {
+        "code": "review_image",
+        "name": "Mensaje imagen",
+        "type": "fix_message",
+        "description": "Mostrar mensaje después de envío de imagen",
+        "content": "📷 Hemos recibido tu imagen y nuestro equipo la revisará a la mayor brevedad posible. 😊 Un profesional se pondrá en contacto contigo lo antes posible.",
+        "actions": [
+            "fix_chat"
+        ],
+        "attachments": []
+    },
+    {
+        "code": "message_menu",
+        "name": "Menú",
+        "type": "fix_message",
+        "description": "El usuario solicita que le muestres el menú de opciones principal",
+        "content": "/data/fix_messages/message_menu_es.md",
+        "actions": [],
+        "attachments": []
+    },
+    {
+        "code": "message_courses",
+        "name": "Información Cursos",
+        "type": "fix_message",
+        "description": "El usuario solicita información sobre los cursos",
+        "content": "/data/fix_messages/message_courses_es.md",
+        "actions": [
+            "fix_chat"
+        ],
+        "attachments": []
+    },
+    {
+        "code": "message_capilar",
+        "name": "Micropigmentación Capilar",
+        "type": "fix_message",
+        "description": "Solicitan información sobre la micropigmentación capilar o tatuar el cuero cabelludo",
+        "content": "",
+        "actions": [],
+        "attachments": [
+            "./storage/capilar.png"
+        ]
+    },
+    {
+        "code": "message_agent_request",
+        "name": "Solicitar Agente",
+        "type": "fix_message",
+        "description": "Solo pone 'Agente' o en inglés 'Agent' en el mensaje",
+        "content": "¡Claro! 😊 Te paso con una persona del equipo. Ten en cuenta que la atención puede demorarse unos minutos. Disculpa las molestias.",
+        "actions": [
+            "fix_chat"
+        ],
+        "attachments": []
+    },
+    {
+        "code": "message_human_request",
+        "name": "Solicitar atención",
+        "type": "fix_message",
+        "description": "Si el mensaje actual del usuario indica de forma explícita que desea ser atendido/a por una persona.",
+        "content": "😊 Te paso con una persona del equipo. Le atenderan en la mayor brevedad posible. Horario de atención al público de lunes a viernes de 10:00 a 19:00, miercoles de 11:00 a 20:00. Disculpa las molestias.",
+        "actions": [
+            "fix_chat"
+        ],
+        "attachments": []
+    },
+    {
+        "code": "appointment_tamara",
+        "name": "Cita Tamara",
+        "type": "message_fixed",
+        "actions": [
+            "fix_chat"
+        ]
+    },
+    {
+        "code": "message_instant_human_attention",
+        "name": "Atención Humana Inmediata",
+        "type": "fix_message",
+        "description": "Solicitan atención humana de forma inmediata.",
+        "content": "En breve la persona encargada se pondrá en contacto para gestionar la consulta. 🗓️",
+        "actions": [
+            "fix_chat"
+        ],
+        "attachments": [],
+        "properties": {}
+    },
+    {
+        "code": "appointment_adjustment",
+        "name": "Ajuste de Cita",
+        "type": "fix_message",
+        "description": "La clienta quiere añadir/modificar servicios a una cita existente.",
+        "content": "En breve la persona encargada se pondrá en contacto para gestionar la consulta. 🗓️",
+        "actions": [
+            "fix_chat"
+        ],
+        "attachments": [],
+        "properties": {}
+    },
+    {
+        "code": "notify_delay",
+        "name": "Aviso Retraso",
+        "type": "fix_message",
+        "description": "Nos comunican que vienen con retraso a una cita",
+        "content": "🚨 Por favor llamanos a este mismo número para que podamos gestionar tu cita!",
+        "actions": [
+            "fix_chat"
+        ],
+        "attachments": []
+    }
+]

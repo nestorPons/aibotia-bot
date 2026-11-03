@@ -1,0 +1,158 @@
+# Producción en VPS (Hostinger) detrás de Traefik.
+# Uso:
+#   cd deploy && cp .env.example .env   # rellenar secretos
+#   docker compose -f docker-compose.prod.yml up -d --build
+# Requiere la red externa traefik-net y el certresolver myresolver
+# (ver /root/traefik/docker-compose.yml en el VPS).
+
+name: aibotia
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-aibotia}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD requerida}
+      POSTGRES_DB: ${POSTGRES_DB:-aibotia}
+      TZ: ${TZ:-Europe/Madrid}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aibotia} -d ${POSTGRES_DB:-aibotia}"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - internal
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    restart: unless-stopped
+    networks:
+      - internal
+
+  botd:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: aibotia-botd:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      INSTANCE_ID: ${INSTANCE_ID:-default}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+      HTTP_ADDR: ":3000"
+      API_KEY: ${API_KEY:?API_KEY requerida}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://aibotia.com,https://www.aibotia.com}
+      ADMIN_ENABLED: ${ADMIN_ENABLED:-true}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_OPERATOR_NAME: ${ADMIN_OPERATOR_NAME:-Operador}
+      ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET:-}
+      ADMIN_SESSION_TTL: ${ADMIN_SESSION_TTL:-12h}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-6.1-sol}
+      OPENAI_EMBED_MODEL: ${OPENAI_EMBED_MODEL:-text-embedding-3-small}
+      RAG_THRESHOLD: ${RAG_THRESHOLD:-0.78}
+      PROMPTS_DIR: data/seeds/prompts
+      DATA_DIR: data/seeds
+      DATABASE_URL: postgres://${POSTGRES_USER:-aibotia}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-aibotia}?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
+      AUTO_MIGRATE: "true"
+      WHATSAPP_ENABLED: ${WHATSAPP_ENABLED:-true}
+      HOURS_TO_ACTIVE: ${HOURS_TO_ACTIVE:-168}
+      BUFFER_MIN_MS: ${BUFFER_MIN_MS:-1000}
+      BUFFER_MAX_MS: ${BUFFER_MAX_MS:-15000}
+      REMINDER_CRON: "${REMINDER_CRON:-*/10 * * * *}"
+      SPAM_LIMIT: ${SPAM_LIMIT:-5}
+      SPAM_WINDOW: ${SPAM_WINDOW:-60s}
+      LOCATION_NAME: ${LOCATION_NAME:-}
+      LOCATION_ADDRESS: ${LOCATION_ADDRESS:-}
+      LOCATION_LAT: ${LOCATION_LAT:-0}
+      LOCATION_LNG: ${LOCATION_LNG:-0}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_SECURE: ${SMTP_SECURE:-starttls}
+      CONTACT_TO: ${CONTACT_TO:-info@nestorpons.com}
+      TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-}
+      TURNSTILE_SECRET: ${TURNSTILE_SECRET:-}
+      TZ: ${TZ:-Europe/Madrid}
+    ports:
+      # Solo loopback para diagnósticos; el tráfico público entra por Traefik.
+      - "127.0.0.1:${HTTP_PORT:-3000}:3000"
+    restart: unless-stopped
+    networks:
+      - internal
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      - "traefik.http.routers.aibotia.rule=Host(`aibotia.com`) || Host(`www.aibotia.com`)"
+      - "traefik.http.routers.aibotia.entrypoints=web,websecure"
+      - "traefik.http.routers.aibotia.tls=true"
+      - "traefik.http.routers.aibotia.tls.certresolver=myresolver"
+      - "traefik.http.routers.aibotia.middlewares=aibotia-www@docker"
+      - "traefik.http.routers.aibotia.service=aibotia"
+      - "traefik.http.services.aibotia.loadbalancer.server.port=3000"
+      - "traefik.http.middlewares.aibotia-www.redirectregex.regex=^https?://www\\.aibotia\\.com/(.*)"
+      - "traefik.http.middlewares.aibotia-www.redirectregex.replacement=https://aibotia.com/$${1}"
+      - "traefik.http.middlewares.aibotia-www.redirectregex.permanent=true"
+
+  # Bot de pruebas (perfil "tester", no se levanta con el stack).
+  # Uso: docker compose -f docker-compose.prod.yml --profile tester run --rm tester -to 34600111222
+  tester:
+    profiles: ["tester"]
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.tester
+    image: aibotia-tester:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+      botd:
+        condition: service_started
+    environment:
+      TESTER_DATABASE_URL: postgres://${POSTGRES_USER:-aibotia}:${POSTGRES_PASSWORD}@postgres:5432/${TESTER_DB:-aibotia_tester}?sslmode=disable
+      TEST_TARGET: ${TEST_TARGET:-}
+      TESTER_CASES_DIR: ${TESTER_CASES_DIR:-data/test/cases}
+      TESTER_REPORT_DIR: /app/reports
+      BOT_API_BASE: http://botd:3000
+      BOT_API_KEY: ${API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-6.1-sol}
+      TZ: ${TZ:-Europe/Madrid}
+    volumes:
+      - tester-reports:/app/reports
+    networks:
+      - internal
+    stdin_open: true
+    tty: true
+    restart: "no"
+
+volumes:
+  pgdata:
+  redisdata:
+  tester-reports:
+
+networks:
+  internal:
+    driver: bridge
+  traefik-net:
+    external: true

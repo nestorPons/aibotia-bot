@@ -1,0 +1,157 @@
+{
+    "nano_tf_cejas": [
+        "TF"
+    ],
+    "nano_tf_ojos": [
+        "TF"
+    ],
+    "nano_tf_labios": [
+        "TF"
+    ],
+    "nano_eq_cejas": [
+        "LL"
+    ],
+    "nano_eq_ojos": [
+        "LL"
+    ],
+    "nano_eq_labios": [
+        "LL"
+    ],
+    "nano_rep_cons": [
+        "LL",
+        "TF"
+    ],
+    "nano_rep_res": [
+        "LL",
+        "TF"
+    ],
+    "nano_prueba": [
+        "LL",
+        "TF"
+    ],
+    "ext_lab_anes": [
+        "LL",
+        "TF"
+    ],
+    "micro_cap_cons": [
+        "TF",
+        "LL"
+    ],
+    "rem_las_cejas": [
+        "LL",
+        "TF"
+    ],
+    "rem_der_detox": [
+        "LL",
+        "TF"
+    ],
+    "rem_las_eye": [
+        "TF"
+    ],
+    "rem_las_tatoo": [
+        "LL",
+        "TF"
+    ],
+    "fac_hig_90": [
+        "EM"
+    ],
+    "fac_rev_90": [
+        "EM"
+    ],
+    "fac_pel_45": [
+        "EM"
+    ],
+    "fac_derm_60": [
+        "EM"
+    ],
+    "fac_dre_30": [
+        "EM"
+    ],
+    "fac_crio_full": [
+        "EM"
+    ],
+    "fac_rev_0": [
+        "EM"
+    ],
+    "corp_dre_bra": [
+        "EM"
+    ],
+    "corp_cel_cero": [
+        "EM"
+    ],
+    "corp_detox_90": [
+        "EM"
+    ],
+    "corp_relax_60": [
+        "EM"
+    ],
+    "corp_liped_180": [
+        "EM"
+    ],
+    "corp_cav_60": [
+        "EM"
+    ],
+    "corp_crio_din": [
+        "EM"
+    ],
+    "corp_crio_esc": [
+        "EM"
+    ],
+    "las_w_bas": [
+        "LL"
+    ],
+    "las_w_med": [
+        "LL"
+    ],
+    "las_w_com": [
+        "LL"
+    ],
+    "las_w_full": [
+        "LL"
+    ],
+    "las_m_bas": [
+        "LL"
+    ],
+    "las_m_med": [
+        "LL"
+    ],
+    "las_m_com": [
+        "LL"
+    ],
+    "las_m_full": [
+        "LL"
+    ],
+    "las_z_mini": [
+        "LL"
+    ],
+    "las_z_peq": [
+        "LL"
+    ],
+    "las_z_med": [
+        "LL"
+    ],
+    "las_z_comb": [
+        "LL"
+    ],
+    "las_z_suel": [
+        "LL"
+    ],
+    "las_z_gran": [
+        "LL"
+    ],
+    "res_cita_micro": [
+        "LL",
+        "TF"
+    ],
+    "eval_prim_vis": [
+        "LL",
+        "TF"
+    ],
+    "eval_vis_est": [
+        "EM"
+    ],
+    "mod_formacion": [
+        "LL",
+        "TF"
+    ]
+}

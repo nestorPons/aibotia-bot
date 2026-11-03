@@ -1,0 +1,72 @@
+[
+    {
+        "code": "LL",
+        "name": "Lledó Llobregat",
+        "role": "Micropigmentadora",
+        "description": [
+            "Especialista en 1ª visita,",
+            "Micropigmentación de cejas y labios,",
+            "y Láser de cejas y labio."
+        ],
+        "services": [
+            "nano_eq_cejas",
+            "nano_eq_ojos",
+            "nano_eq_labios",
+            "nano_rep_cons",
+            "nano_rep_res",
+            "nano_prueba",
+            "ext_lab_anes",
+            "micro_cap_cons",
+            "rem_las_cejas",
+            "rem_der_detox",
+            "rem_las_tatoo",
+            "las_w_bas",
+            "las_w_med",
+            "las_w_com",
+            "las_w_full",
+            "las_m_bas",
+            "las_m_med",
+            "las_m_com",
+            "las_m_full",
+            "las_z_mini",
+            "las_z_peq",
+            "las_z_med",
+            "las_z_comb",
+            "las_z_suel",
+            "las_z_gran",
+            "res_cita_micro",
+            "eval_prim_vis",
+            "mod_formacion"
+        ]
+    },
+    {
+        "code": "TF",
+        "name": "Tamara Freitas",
+        "role": "Jefa del Studio",
+        "description": [
+            "Especialista en 1ª visita,",
+            "Micropigmentación de cejas, labios y ojos (casos puntuales),",
+            "y Láser de cejas, labios y ojos.",
+            "Las diferencias de precio entre Tamara y el resto del equipo se deben principalmente a la alta demanda que tiene su agenda.",
+            "Tamara no solo atiende clientas, sino que también imparte formaciones especializadas y gestiona todo el funcionamiento del centro, lo que hace que su tiempo sea muy limitado.",
+            "Cada profesional ha sido cuidadosamente formado por Tamara y trabaja bajo su supervisión directa. Ella está siempre cerca, revisando los trabajos y asegurándose de que cada detalle esté perfecto.",
+            "Nuestro equipo experto se encarga de las citas de valoración, láser y nanopigmentación de cejas, ojos y labios.",
+            "Tamara se dedica exclusivamente a los tratamientos de nanopigmentación, por lo que recomendamos consultar la disponibilidad de su agenda si deseas reservar con ella.",
+            "La agenda de Tamara se abre de forma puntual en función de su disponibilidad. Por el momento no tenemos una fecha exacta para nuevas citas."
+        ]
+    },
+    {
+        "code": "EM",
+        "name": "Edlane Medeiros",
+        "role": "Esteticista",
+        "description": [
+            "Especialista en Consultoría Estética Personalizada,",
+            "Higiene Facial Glow Up, Revitalización Facial,",
+            "Peeling Facial, Microneedling (Dermapen),",
+            "Drenaje Linfático Facial, Crio Full Face,",
+            "Cool Crio Escultura, Masaje Sliim Redux,",
+            "Celulitis Cero, Detox Corporal, Masaje Relajante,",
+            "Tratamiento de Lipedema y Cavitación."
+        ]
+    }
+]

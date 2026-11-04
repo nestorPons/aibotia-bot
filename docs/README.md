@@ -24,7 +24,7 @@ Verificación actual: `go build ./...` y `go test ./...` OK.
 
 ```bash
 cp .env.example .env         # API_KEY, DATABASE_URL, REDIS_URL, OPENAI_API_KEY
-docker compose -f deploy/docker-compose.yml up -d postgres redis
+docker compose -f docker-compose.staging.yml up -d postgres redis
 make migrate-up              # esquema
 make seed                    # bloques de contenido (fix-messages)
 make embed                   # embeddings del RAG

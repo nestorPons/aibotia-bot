@@ -1,7 +1,7 @@
 # Despliegue en VPS (Hostinger) con Traefik
 
 > Producción de `aibotia.com` en `93.127.203.142`.
-> Compose: [`deploy/docker-compose.prod.yml`](../deploy/docker-compose.prod.yml).
+> Compose: [`docker-compose.prod.yml`](../docker-compose.prod.yml) (raíz del repo).
 
 ## Topología
 
@@ -9,7 +9,7 @@
 |----------|-------|
 | Host | `root@93.127.203.142` |
 | Directorio | `/root/projects/aibotia.com` |
-| Compose | `deploy/docker-compose.prod.yml` (proyecto `aibotia`) |
+| Compose | `docker-compose.prod.yml` en la raíz (proyecto `aibotia`) |
 | Dominio | `aibotia.com` (+ redirección `www` → apex) |
 | Proxy | Traefik `/root/traefik` (red externa `traefik-net`, resolver `myresolver`) |
 | TLS | Let's Encrypt (HTTP-01) |
@@ -25,10 +25,11 @@ Internet → Traefik (80/443) → aibotia-botd-1:3000
 
 | Archivo | Función |
 |---------|---------|
-| `deploy/docker-compose.prod.yml` | Stack de producción + labels de Traefik. |
-| `deploy/.env` (servidor, `chmod 600`) | Secretos y configuración; **no se sube** con rsync. |
-| `deploy/.env.example` | Plantilla de variables. |
-| `deploy/deploy.sh` | Sincroniza código y reconstruye el stack. |
+| `docker-compose.prod.yml` | Stack de producción + labels de Traefik. |
+| `.env` (servidor, `chmod 600`) | Secretos y configuración; **no se sube** con rsync. |
+| `.env.example` | Plantilla de variables (dev y prod). |
+| `Dockerfile` / `Dockerfile.tester` | Imágenes de `botd` y del bot de pruebas. |
+| `deploy.sh` | Sincroniza código y reconstruye el stack. |
 
 ## Variables clave
 
@@ -44,15 +45,15 @@ Internet → Traefik (80/443) → aibotia-botd-1:3000
 ## Rutina de despliegue
 
 ```bash
-# Desde el repo local (excluye deploy/.env)
-./deploy/deploy.sh
+# Desde la raíz del repo local (excluye .env y los compose de dev)
+./deploy.sh
 ```
 
 Equivalente manual:
 
 ```bash
-rsync -az --delete --exclude='.env' --exclude='deploy/.env' ... ./ root@93.127.203.142:/root/projects/aibotia.com/
-ssh root@93.127.203.142 'cd /root/projects/aibotia.com/deploy && docker compose -f docker-compose.prod.yml up -d --build'
+rsync -az --delete --exclude='.env' --exclude='docker-compose.yml' ... ./ root@93.127.203.142:/root/projects/aibotia.com/
+ssh root@93.127.203.142 'cd /root/projects/aibotia.com && docker compose -f docker-compose.prod.yml up -d --build'
 ```
 
 ## Primer arranque / datos
@@ -62,7 +63,7 @@ servicios si las tablas están vacías. Los bloques de contenido y los embedding
 se cargan una vez con un contenedor efímero:
 
 ```bash
-ssh root@93.127.203.142 'set -a; . /root/projects/aibotia.com/deploy/.env; set +a
+ssh root@93.127.203.142 'set -a; . /root/projects/aibotia.com/.env; set +a
 docker run --rm -v /root/projects/aibotia.com:/src -w /src --network aibotia_internal \
   -e APP_ENV=production -e API_KEY="$API_KEY" -e OPENAI_API_KEY="$OPENAI_API_KEY" \
   -e PROMPTS_DIR=data/seeds/prompts -e DATA_DIR=data/seeds \

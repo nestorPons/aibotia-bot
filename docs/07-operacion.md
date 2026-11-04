@@ -133,11 +133,12 @@ docker compose logs -f botd
 ## Docker (producción / staging)
 
 ```bash
-docker compose -f deploy/docker-compose.yml up -d --build
-docker compose -f deploy/docker-compose.yml logs -f botd
+docker compose -f docker-compose.staging.yml up -d --build
+docker compose -f docker-compose.staging.yml logs -f botd
 ```
 
-- Contexto de build: raíz del repo (`deploy/docker-compose.yml`: `context: ..`).
+- Contexto de build: raíz del repo (`docker-compose.staging.yml`: `context: .`).
+- Producción: `docker-compose.prod.yml` en la raíz (ver [`11-despliegue-vps`](11-despliegue-vps.md)).
 - Imagen final: `/app/botd` + `/app/data` (incluye `data/seeds/`); usuario no root.
 - Servicios: `postgres` (pgvector/pg16), `redis` (7.4, AOF), `botd` (:3000).
 - Volúmenes: `pgdata`, `redisdata`.
@@ -154,11 +155,11 @@ docker compose -f deploy/docker-compose.yml logs -f botd
 | `seed` / `embed` | contenido y RAG |
 | `migrate-data` | MariaDB → PostgreSQL |
 | `loadtest` | carga HTTP (`-key "$(API_KEY)"`) |
-| `docker-up` / `docker-down` | Compose de `deploy/` |
+| `docker-up` / `docker-down` | Compose de staging (`docker-compose.staging.yml`) |
 
 ## Cutover desde legacy
 
-Runbook completo: [`deploy/CUTOVER.md`](../deploy/CUTOVER.md).
+Runbook completo: [`13-cutover.md`](13-cutover.md).
 
 Resumen:
 1. Infra PostgreSQL+Redis y `.env`.

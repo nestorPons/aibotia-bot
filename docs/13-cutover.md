@@ -14,7 +14,7 @@ cp .env.example .env   # configura API_KEY, DATABASE_URL, REDIS_URL, OPENAI_API_
 ```
 Levantar dependencias (o usar servicios gestionados):
 ```bash
-docker compose -f deploy/docker-compose.yml up -d postgres redis
+docker compose -f docker-compose.staging.yml up -d postgres redis
 ```
 
 ## 2. Crear esquema

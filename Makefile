@@ -50,10 +50,10 @@ loadtest:
 	go run ./cmd/loadtest -key "$(API_KEY)"
 
 docker-up:
-	docker compose -f deploy/docker-compose.yml up --build -d
+	docker compose -f docker-compose.staging.yml up --build -d
 
 docker-down:
-	docker compose -f deploy/docker-compose.yml down
+	docker compose -f docker-compose.staging.yml down
 
 # Compila dentro del contenedor de desarrollo sin reconstruir la imagen.
 dev-build:
@@ -94,7 +94,7 @@ tester-suite:
 	go run ./cmd/tester $(TESTER_FLAGS) -suite $(or $(SUITE),all)
 
 tester-docker:
-	docker compose -f deploy/docker-compose.prod.yml --profile tester run --rm --build tester $(TESTER_FLAGS)
+	docker compose -f docker-compose.prod.yml --profile tester run --rm --build tester $(TESTER_FLAGS)
 
 # Ver los logs guardados en el navegador (no necesita WhatsApp ni BD).
 # Uso: make tester-serve  ·  luego abrir http://127.0.0.1:8091

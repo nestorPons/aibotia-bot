@@ -29,7 +29,13 @@
 │   ├── version/            build info (ldflags)
 │   └── whatsapp/           adaptador whatsmeow
 ├── data/                   seeds (prompts, servicios, fix_messages, embeddings) + catálogos de referencia
-├── deploy/                 Dockerfile, compose, CUTOVER.md
+├── Dockerfile              imagen de producción (botd)
+├── Dockerfile.dev          imagen de desarrollo
+├── Dockerfile.tester       bot de pruebas
+├── docker-compose.yml      stack de desarrollo
+├── docker-compose.prod.yml stack de producción
+├── docker-compose.staging.yml stack de staging
+├── deploy.sh               despliegue al VPS
 ├── docs/                   esta documentación
 ├── bin/                    binario compilado (ignorado)
 ├── .env.example            plantilla de entorno

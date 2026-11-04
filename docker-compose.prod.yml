@@ -43,8 +43,8 @@ services:
 
   botd:
     build:
-      context: ..
-      dockerfile: deploy/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     image: aibotia-botd:latest
     depends_on:
       postgres:
@@ -71,6 +71,7 @@ services:
       RAG_THRESHOLD: ${RAG_THRESHOLD:-0.78}
       PROMPTS_DIR: data/seeds/prompts
       DATA_DIR: data/seeds
+      TESTER_REPORT_DIR: /app/reports
       DATABASE_URL: postgres://${POSTGRES_USER:-aibotia}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-aibotia}?sslmode=disable
       REDIS_URL: redis://redis:6379/0
       AUTO_MIGRATE: "true"
@@ -99,6 +100,9 @@ services:
     ports:
       # Solo loopback para diagnósticos; el tráfico público entra por Traefik.
       - "127.0.0.1:${HTTP_PORT:-3000}:3000"
+    volumes:
+      # Logs del tester compartidos con el perfil "tester" (solo lectura).
+      - tester-reports:/app/reports:ro
     restart: unless-stopped
     networks:
       - internal
@@ -122,8 +126,8 @@ services:
   tester:
     profiles: ["tester"]
     build:
-      context: ..
-      dockerfile: deploy/Dockerfile.tester
+      context: .
+      dockerfile: Dockerfile.tester
     image: aibotia-tester:latest
     depends_on:
       postgres:

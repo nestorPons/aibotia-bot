@@ -243,7 +243,7 @@ Después, `make tester-serve` y abre el log que quieras enseñar.
 
 ```bash
 cd /root/projects/aibotia.com
-docker compose -f deploy/docker-compose.prod.yml --profile tester run --rm -T --build \
+docker compose -f docker-compose.prod.yml --profile tester run --rm -T --build \
   tester -to 34XXXXXXXXX -suite all -eval
 ```
 

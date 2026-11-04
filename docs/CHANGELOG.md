@@ -3,6 +3,37 @@
 > Registro de cambios de estado. Formato: fecha · tipo · cambios · archivos.
 > Histórico detallado de la reescritura (fases 0–7): `.old/docs/CHANGELOG.md`.
 
+## 2026-11-04 · Aplanado del despliegue: fuera la carpeta `deploy/`
+
+### Cambiado
+- `deploy/Dockerfile` → `Dockerfile`, `deploy/Dockerfile.tester` →
+  `Dockerfile.tester`, `deploy/docker-compose.prod.yml` →
+  `docker-compose.prod.yml`, `deploy/docker-compose.yml` →
+  `docker-compose.staging.yml` (`name: aibotia-staging`),
+  `deploy/deploy.sh` → `deploy.sh`, `deploy/CUTOVER.md` → `docs/13-cutover.md`.
+- `deploy/.env.example` eliminado: sus claves exclusivas de producción se
+  fusionaron en el `.env.example` raíz.
+- Compose de producción y staging usan `context: .` y `dockerfile: Dockerfile*`.
+- `deploy.sh` ahora se ejecuta desde la raíz, excluye `.env`, `docker-compose.yml`
+  (dev), `docker-compose.staging.yml` y `Dockerfile.dev` para que el VPS no
+  pueda arrancar el stack de desarrollo con el `.env` de producción.
+- El `.env` del VPS pasa de `deploy/.env` a `.env` en la raíz del proyecto
+  (excluido del rsync; sigue sin versionarse).
+
+### Verificación
+- `docker compose config` OK en dev, prod y staging.
+- Producción recreada con `--force-recreate`: contenedores gestionados desde
+  `/root/projects/aibotia.com/docker-compose.prod.yml`; volúmenes intactos
+  (services 48, prompts 33, migraciones 9); `/ready` OK; landing 200;
+  `/api/v1/ping` 404 (API desactivada).
+
+### Archivos
+- `Dockerfile`, `Dockerfile.tester`, `docker-compose.prod.yml`,
+  `docker-compose.staging.yml`, `deploy.sh`, `Makefile`, `.env.example`,
+  `docs/13-cutover.md`, `docs/07-operacion.md`, `docs/08-estructura-repo.md`,
+  `docs/11-despliegue-vps.md`, `docs/12-bot-pruebas.md`, `docs/README.md`,
+  `README.md`, `docs/CHANGELOG.md`.
+
 ## 2026-11-04 · .env de producción sincronizado y REMINDER_TEMPLATE en compose
 
 ### Cambiado

@@ -58,7 +58,7 @@ Vincular WhatsApp: escanear el QR de los logs o `GET /api/v1/whatsapp/qr`.
 
 ```bash
 make docker-up
-docker compose -f deploy/docker-compose.yml logs -f botd
+docker compose -f docker-compose.prod.yml logs -f botd
 ```
 
 ## Comandos
@@ -142,9 +142,9 @@ El resto (modelo, RAG, debounce, anti-spam, recordatorios, ubicación) está en
 cmd/        botd, migrate, seed, embed, migrate-data, loadtest, tester
 internal/   pipeline, assistant, whatsapp, httpapi (+admin), bootstrap, actions, appointments, store...
 data/       seeds (prompts, servicios, fix_messages, embeddings) + catálogos de referencia
-deploy/     Dockerfile, compose, CUTOVER.md
+raíz       Dockerfile(.dev/.tester), docker-compose(.prod/.staging).yml, deploy.sh
 docs/       documentación del sistema actual
 .old/       legacy Node/MariaDB (ignorado)
 ```
 
-Cutover desde el sistema anterior: [`deploy/CUTOVER.md`](deploy/CUTOVER.md).
+Cutover desde el sistema anterior: [`docs/13-cutover.md`](docs/13-cutover.md).

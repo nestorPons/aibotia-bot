@@ -3,6 +3,27 @@
 > Registro de cambios de estado. Formato: fecha · tipo · cambios · archivos.
 > Histórico detallado de la reescritura (fases 0–7): `.old/docs/CHANGELOG.md`.
 
+## 2026-11-04 · .env de producción sincronizado y REMINDER_TEMPLATE en compose
+
+### Cambiado
+- `.env` de producción actualizado desde el `.env` local **adaptado**: se
+  mantienen `APP_ENV=production`, `CORS_ALLOWED_ORIGINS` de producción,
+  `POSTGRES_*`, `API_KEY`, `ADMIN_PASSWORD` y `ADMIN_SESSION_SECRET`; se añade
+  `REMINDER_TEMPLATE` y se fija `TEST_TARGET`. El archivo **no** se versiona.
+- Compose (dev, staging y prod) pasa `REMINDER_TEMPLATE` al contenedor; antes
+  el valor del `.env` se ignoraba. Backups: `/root/.env.bak-<ts>` en el VPS.
+
+### Verificación
+- `docker compose config` OK en dev; stack de producción desplegado y `/ready`
+  OK; dentro de `botd`: `APP_ENV=production`, `API_ENABLED=false`,
+  `REMINDER_TEMPLATE` con valor, `ADMIN_PASSWORD` y `API_KEY` conservados.
+- `git check-ignore` confirma que `.env` sigue fuera del repositorio.
+
+### Archivos
+- `docker-compose.yml`, `deploy/docker-compose.yml`,
+  `deploy/docker-compose.prod.yml`, `docs/CHANGELOG.md`
+  (más `deploy/.env` del VPS, no versionado).
+
 ## 2026-11-04 · Modo prueba: resumen del panel en la derivación
 
 ### Añadido

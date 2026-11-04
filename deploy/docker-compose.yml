@@ -60,6 +60,8 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER:-aibotia}:${POSTGRES_PASSWORD:-aibotia}@postgres:5432/${POSTGRES_DB:-aibotia}?sslmode=disable
       REDIS_URL: redis://redis:6379/0
       AUTO_MIGRATE: "true"
+      REMINDER_CRON: "${REMINDER_CRON:-*/10 * * * *}"
+      REMINDER_TEMPLATE: "${REMINDER_TEMPLATE:-📅 Hola {name}, tienes una cita programada el {date}. ¡No olvides asistir!}"
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USERNAME: ${SMTP_USERNAME:-}

@@ -73,6 +73,7 @@ services:
       BUFFER_MIN_MS: ${BUFFER_MIN_MS:-1000}
       BUFFER_MAX_MS: ${BUFFER_MAX_MS:-15000}
       REMINDER_CRON: "${REMINDER_CRON:-*/10 * * * *}"
+      REMINDER_TEMPLATE: "${REMINDER_TEMPLATE:-📅 Hola {name}, tienes una cita programada el {date}. ¡No olvides asistir!}"
       SPAM_LIMIT: ${SPAM_LIMIT:-5}
       SPAM_WINDOW: ${SPAM_WINDOW:-60s}
       LOCATION_NAME: ${LOCATION_NAME:-}

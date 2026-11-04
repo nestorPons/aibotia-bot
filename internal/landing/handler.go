@@ -182,7 +182,7 @@ func (h *Handler) NotFound(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	d := HomePage()
-	d.Title = "Página no encontrada · AIBOT"
+	d.Title = "Página no encontrada · AIBOTIA 2.0"
 	d.Description = "La página que buscas no existe."
 	d.Path = r.URL.Path
 	h.renderPage(w, r, "notfound", d, http.StatusNotFound)

@@ -938,9 +938,9 @@ ul {
 
 .plan-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 22px;
-  max-width: 940px;
+  max-width: 560px;
   margin: 0 auto;
 }
 

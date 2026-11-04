@@ -3,6 +3,26 @@
 > Registro de cambios de estado. Formato: fecha · tipo · cambios · archivos.
 > Histórico detallado de la reescritura (fases 0–7): `.old/docs/CHANGELOG.md`.
 
+## 2026-11-04 · Landing: rebranding AIBOTIA 2.0 y plan único
+
+### Cambiado
+- Marca de la landing renombrada de `AIBOT` a `AIBOTIA 2.0` en título SEO,
+  metadatos, header, footer, mockup de chat y textos de la portada.
+- Eliminado el plan «Cuota mensual» (50 €/mes) de `Plans`. Queda solo
+  «Instalación personalizada» (desde 90 €), ahora destacado.
+- Portada de precios: copy de pago único (`paga solo por lo que necesitas` →
+  `con un pago único`) y grid de planes a una columna centrada (940 → 560 px).
+- Retirada la etiqueta «Recomendado» del plan (ya no hay comparativa).
+
+### Verificación
+- `go build ./...`, `go vet ./...` OK.
+
+### Archivos
+- `internal/landing/content.go`, `internal/landing/handler.go`,
+  `internal/landing/templates/pages/home.html`,
+  `internal/landing/templates/partials/{header,footer,chat-mockup}.html`,
+  `internal/landing/static/css/style.css`, `docs/CHANGELOG.md`.
+
 ## 2026-11-03 · Repositorio público en GitHub y despliegue en producción
 
 ### Añadido

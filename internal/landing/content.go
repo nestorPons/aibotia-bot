@@ -4,7 +4,7 @@ import "time"
 
 func SiteData() Site {
 	return Site{
-		Name:        "AIBOT",
+		Name:        "AIBOTIA 2.0",
 		Tagline:     "Automatiza tu atención al cliente en WhatsApp",
 		Email:       "info@nestorpons.com",
 		Phone:       "686 115 433",
@@ -13,15 +13,15 @@ func SiteData() Site {
 		Location:    "12002 Castellón",
 		GitHub:      "https://github.com/nestorPons/wwebjs-bot",
 		Web:         "https://nestorpons.com",
-		LegalNote:   "AIBOT es un producto de Néstor Pons",
+		LegalNote:   "AIBOTIA 2.0 es un producto de Néstor Pons",
 	}
 }
 
 func HomePage() PageData {
 	site := SiteData()
 	return PageData{
-		Title:       "AIBOT · Chatbot para WhatsApp",
-		Description: "AIBOT responde preguntas, agenda citas y envía recordatorios por WhatsApp. Un sistema de IA instalado en tu propia infraestructura.",
+		Title:       "AIBOTIA 2.0 · Chatbot para WhatsApp",
+		Description: "AIBOTIA 2.0 responde preguntas, agenda citas y envía recordatorios por WhatsApp. Un sistema de IA instalado en tu propia infraestructura.",
 		Canonical:   "https://aibotia.com/",
 		Path:        "/",
 		Year:        time.Now().Year(),
@@ -56,22 +56,8 @@ func HomePage() PageData {
 					"Carga de datos y conocimiento de tu negocio",
 					"Puesta en marcha y formación",
 				},
-				CTA: "Solicitar instalación",
-			},
-			{
-				Eyebrow:     "Servicio recurrente",
-				Name:        "Cuota mensual",
-				Description: "Mantenimiento, actualizaciones y soporte continuo para que tu asistente siga funcionando sin preocupaciones.",
-				Price:       "50 €/mes",
-				PriceNote:   "+ Gastos por uso de la API de OpenAI. Precios sin IVA incluido.",
-				Features: []string{
-					"Mantenimiento y soporte técnico",
-					"Actualizaciones del asistente",
-					"Supervisión del servicio",
-					"Personalización adicional: 25 €/hora",
-				},
 				Highlight: true,
-				CTA:       "Hablar con nosotros",
+				CTA:       "Solicitar instalación",
 			},
 		},
 		Advantages: []Advantage{

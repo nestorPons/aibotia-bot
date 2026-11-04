@@ -3,6 +3,8 @@
 ## Convenciones
 
 - Base: `/api/v1`.
+- Interruptor: `API_ENABLED=false` desmonta todas las rutas `/api/v1` (responden
+  404). La landing, `/health`, `/ready` y `/admin` siguen activos.
 - Auth: cabecera `x-api-key` (comparación constant-time). Públicos: `/health`, `/ready`.
 - SSE acepta también `?key=<API_KEY>`.
 - JSON UTF-8; error uniforme:

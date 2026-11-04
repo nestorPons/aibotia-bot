@@ -9,9 +9,13 @@ import (
 )
 
 func testRouter() http.Handler {
+	return newTestRouter(true)
+}
+
+func newTestRouter(apiEnabled bool) http.Handler {
 	return NewRouter(Deps{
 		Log:     discardLogger(),
-		Config:  &config.Config{APIKey: "k", CORSAllowedOrigins: []string{"*"}},
+		Config:  &config.Config{APIKey: "k", APIEnabled: apiEnabled, CORSAllowedOrigins: []string{"*"}},
 		Version: "test",
 	})
 }
@@ -39,5 +43,15 @@ func TestProtectedWithAPIKey(t *testing.T) {
 	testRouter().ServeHTTP(rec, req)
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status = %d, quiero 200", rec.Code)
+	}
+}
+
+func TestAPIEnabledFalseNoMontaAPI(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/ping", nil)
+	req.Header.Set("x-api-key", "k")
+	rec := httptest.NewRecorder()
+	newTestRouter(false).ServeHTTP(rec, req)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, quiero 404", rec.Code)
 	}
 }

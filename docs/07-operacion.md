@@ -17,6 +17,7 @@
 | `HTTP_ADDR` | `:3000` | no | Escucha HTTP. |
 | `HTTP_*_TIMEOUT` | 10s/30s/60s/15s | no | Read/write/idle/shutdown. |
 | `API_KEY` | — | **sí** | Auth; no puede igualar a OpenAI. |
+| `API_ENABLED` | `true` | no | `false` ⇒ no se monta `/api/v1` (solo landing, `/health`, `/ready`, `/admin`). |
 | `CORS_ALLOWED_ORIGINS` | `*` | no | Lista separada por comas. |
 | `ADMIN_ENABLED` | `true` | no | Panel embebido `/admin`. |
 | `ADMIN_PASSWORD` | vacío | no | Contraseña del panel. En producción vacío ⇒ panel deshabilitado. En dev vacío ⇒ usa `API_KEY`. |

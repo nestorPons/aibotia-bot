@@ -36,6 +36,7 @@ Internet → Traefik (80/443) → aibotia-botd-1:3000
 |----------|------|
 | `APP_ENV=production` | Exige `OPENAI_API_KEY` y desactiva `/admin` si falta `ADMIN_PASSWORD`. |
 | `API_KEY` | Auth de `/api/v1` (distinta de OpenAI). |
+| `API_ENABLED` | `false` en producción: la API pública no se monta. |
 | `ADMIN_PASSWORD` / `ADMIN_SESSION_SECRET` | Acceso y firma de cookie del panel. |
 | `POSTGRES_PASSWORD` | Password de PostgreSQL (se interpola en `DATABASE_URL`). |
 | `CORS_ALLOWED_ORIGINS` | `https://aibotia.com,https://www.aibotia.com`. |

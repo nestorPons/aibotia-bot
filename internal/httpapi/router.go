@@ -76,50 +76,52 @@ func NewRouter(d Deps) http.Handler {
 		r.NotFound(d.Landing.NotFound)
 	}
 
-	// Rutas protegidas por API key.
-	r.Group(func(pr chi.Router) {
-		pr.Use(apiKeyAuth(d.Config.APIKey))
+	// Rutas protegidas por API key (desactivables con API_ENABLED=false).
+	if d.Config.APIEnabled {
+		r.Group(func(pr chi.Router) {
+			pr.Use(apiKeyAuth(d.Config.APIKey))
 
-		wa := newWhatsAppHandlers(d.Log, d.WhatsApp)
-		users := newUserHandlers(d.Log, d.Users, d.Settings, d.History, d.Interactions, d.WhatsApp, d.Pipeline, d.AntiSpam, d.Summarizer)
-		messages := newMessageHandlers(d.Log, d.Interactions)
-		instructions := newInstructionHandlers(d.Log, d.Instructions)
-		assistant := newAssistantHandlers(d.Log, d.Settings)
+			wa := newWhatsAppHandlers(d.Log, d.WhatsApp)
+			users := newUserHandlers(d.Log, d.Users, d.Settings, d.History, d.Interactions, d.WhatsApp, d.Pipeline, d.AntiSpam, d.Summarizer)
+			messages := newMessageHandlers(d.Log, d.Interactions)
+			instructions := newInstructionHandlers(d.Log, d.Instructions)
+			assistant := newAssistantHandlers(d.Log, d.Settings)
 
-		pr.Route("/api/v1", func(api chi.Router) {
-			api.Get("/ping", func(w http.ResponseWriter, _ *http.Request) {
-				writeJSON(w, http.StatusOK, map[string]string{"status": "protected ok"})
+			pr.Route("/api/v1", func(api chi.Router) {
+				api.Get("/ping", func(w http.ResponseWriter, _ *http.Request) {
+					writeJSON(w, http.StatusOK, map[string]string{"status": "protected ok"})
+				})
+
+				api.Route("/whatsapp", func(wr chi.Router) {
+					wr.Get("/status", wa.status)
+					wr.Get("/qr", wa.qr)
+					wr.Get("/contact", wa.contact)
+					wr.Post("/logout", wa.logout)
+				})
+
+				api.Get("/assistant/status", assistant.status)
+				api.Put("/assistant/status", assistant.setStatus)
+
+				api.Get("/users", users.list)
+				api.Post("/users/import-users", users.importUsers)
+				api.Get("/users/{id}", users.get)
+				api.Put("/users/{id}", users.update)
+				api.Delete("/users/{id}", users.delete)
+				api.Delete("/users/{id}/history", users.clearHistory)
+				api.Get("/users/{id}/conversation", users.conversation)
+				api.Post("/users/{id}/force-reply", users.forceReply)
+				api.Post("/users/{id}/test-mode", users.setTestMode)
+
+				api.Get("/messages", messages.list)
+				api.Get("/messages/{id}", messages.byUser)
+
+				api.Get("/instructions", instructions.list)
+				api.Get("/instructions/{code}", instructions.get)
+				api.Put("/instructions/{code}", instructions.update)
+				api.Delete("/instructions/{code}", instructions.delete)
 			})
-
-			api.Route("/whatsapp", func(wr chi.Router) {
-				wr.Get("/status", wa.status)
-				wr.Get("/qr", wa.qr)
-				wr.Get("/contact", wa.contact)
-				wr.Post("/logout", wa.logout)
-			})
-
-			api.Get("/assistant/status", assistant.status)
-			api.Put("/assistant/status", assistant.setStatus)
-
-			api.Get("/users", users.list)
-			api.Post("/users/import-users", users.importUsers)
-			api.Get("/users/{id}", users.get)
-			api.Put("/users/{id}", users.update)
-			api.Delete("/users/{id}", users.delete)
-			api.Delete("/users/{id}/history", users.clearHistory)
-			api.Get("/users/{id}/conversation", users.conversation)
-			api.Post("/users/{id}/force-reply", users.forceReply)
-			api.Post("/users/{id}/test-mode", users.setTestMode)
-
-			api.Get("/messages", messages.list)
-			api.Get("/messages/{id}", messages.byUser)
-
-			api.Get("/instructions", instructions.list)
-			api.Get("/instructions/{code}", instructions.get)
-			api.Put("/instructions/{code}", instructions.update)
-			api.Delete("/instructions/{code}", instructions.delete)
 		})
-	})
+	}
 
 	// Panel embebido (auth por sesión propia, fuera de la API key).
 	if d.Admin.Enabled && d.Admin.Password != "" {

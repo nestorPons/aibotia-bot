@@ -3,6 +3,32 @@
 > Registro de cambios de estado. Formato: fecha · tipo · cambios · archivos.
 > Histórico detallado de la reescritura (fases 0–7): `.old/docs/CHANGELOG.md`.
 
+## 2026-11-04 · API pública desactivada en desarrollo y producción
+
+### Añadido
+- Variable `API_ENABLED` (default `true`). Con `false` no se monta el grupo
+  `/api/v1`; solo quedan landing, `/health`, `/ready` y `/admin`.
+- Aviso en el arranque: `API_ENABLED=false; /api/v1 no se monta…`.
+- Test `TestAPIEnabledFalseNoMontaAPI` (404 en `/api/v1/ping`).
+
+### Cambiado
+- `API_ENABLED=false` en `.env` local y en `deploy/.env` del VPS; ambos stacks
+  recreados. La API sigue implementada, solo no se publica.
+- Compose dev/prod/staging propagan `API_ENABLED`.
+
+### Verificación
+- `go build ./...`, `go vet ./...`, tests de `httpapi` y `config` OK.
+- Dev: `/api/v1/ping` → 404; `/`, `/health` → 200.
+- Prod: `/api/v1/ping` y `/api/v1/users` → 404; `/` → 200, `/admin` → 303.
+
+### Archivos
+- `internal/config/config.go`, `internal/httpapi/router.go`,
+  `internal/httpapi/router_test.go`, `cmd/botd/main.go`,
+  `docker-compose.yml`, `deploy/docker-compose.yml`,
+  `deploy/docker-compose.prod.yml`, `.env.example`,
+  `docs/06-api.md`, `docs/07-operacion.md`, `docs/11-despliegue-vps.md`,
+  `docs/CHANGELOG.md`.
+
 ## 2026-11-04 · Landing: rebranding AIBOTIA 2.0 y plan único
 
 ### Cambiado

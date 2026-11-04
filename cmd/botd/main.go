@@ -64,6 +64,9 @@ func run() error {
 	if cfg.OpenAIAPIKey == "" {
 		log.Warn("OPENAI_API_KEY no definida; las funciones de IA no estarán disponibles")
 	}
+	if !cfg.APIEnabled {
+		log.Warn("API_ENABLED=false; /api/v1 no se monta (solo landing, /health, /ready y /admin)")
+	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()

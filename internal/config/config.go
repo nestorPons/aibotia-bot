@@ -24,6 +24,7 @@ type Config struct {
 	HTTPShutdownTimeout time.Duration `env:"HTTP_SHUTDOWN_TIMEOUT" envDefault:"15s"`
 
 	APIKey             string   `env:"API_KEY,required"`
+	APIEnabled         bool     `env:"API_ENABLED" envDefault:"true"`
 	CORSAllowedOrigins []string `env:"CORS_ALLOWED_ORIGINS" envSeparator:"," envDefault:"*"`
 
 	// Panel de administración embebido (/admin).

@@ -13,12 +13,15 @@
 - Portada de precios: copy de pago único (`paga solo por lo que necesitas` →
   `con un pago único`) y grid de planes a una columna centrada (940 → 560 px).
 - Retirada la etiqueta «Recomendado» del plan (ya no hay comparativa).
+- `base.html`: versión del CSS a `?v=2` para evitar caché en navegadores.
 
 ### Verificación
-- `go build ./...`, `go vet ./...` OK.
+- `go build ./...`, `go vet ./...` OK. Render local revisado (1 plan, marca nueva).
+- Desplegado en producción con `deploy/deploy.sh`; `/ready` OK.
 
 ### Archivos
 - `internal/landing/content.go`, `internal/landing/handler.go`,
+  `internal/landing/templates/base.html`,
   `internal/landing/templates/pages/home.html`,
   `internal/landing/templates/partials/{header,footer,chat-mockup}.html`,
   `internal/landing/static/css/style.css`, `docs/CHANGELOG.md`.

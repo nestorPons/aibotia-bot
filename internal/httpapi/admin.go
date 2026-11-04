@@ -836,82 +836,41 @@ func (h *adminHandlers) messageSummary(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
 	defer cancel()
 
-	rows, err := h.interactions.ListByUser(ctx, id, 24)
+	th, err := summary.BuildThread(ctx, h.threadSources(), h.summarizer, id)
 	if err != nil {
 		h.fail(w, "summary_failed", "Error obteniendo el resumen", err)
 		return
 	}
-
-	resp := operatorSummary{UserID: id, Points: []string{}, Source: "fallback"}
-
-	var user domain.User
-	if h.users != nil {
-		if u, err := h.users.Get(ctx, id); err == nil {
-			user = u
-			resp.AIEnabled = u.Active
-			resp.Topic = u.Topic
-		}
-	}
-
-	if len(rows) > 0 {
-		latest := rows[0]
-		resp.NeedsOperator = repo.NeedsOperator(latest.ToolCalls)
-		resp.HandoffReason = repo.HandoffReason(latest.ToolCalls)
-		resp.LastMessageAt = &latest.CreatedAt
-		resp.Messages = len(rows)
-	}
-
-	if h.appointments != nil {
-		if st, err := h.appointments.Get(ctx, id); err == nil &&
-			(st.Status != appointments.StatusIdle || st.Service != "" || st.Availability != "") {
-			appt := &summary.Appointment{
-				Service:      st.Service,
-				Availability: st.Availability,
-				Team:         st.Team,
-				Status:       string(st.Status),
-			}
-			if st.Service != "" && h.services != nil {
-				if sv, err := h.services.Get(ctx, st.Service); err == nil {
-					appt.ServiceName = sv.Name
-				}
-			}
-			resp.Appointment = appt
-		}
-	}
-
-	messages := make([]summary.Message, 0, len(rows)*2)
-	for i := len(rows) - 1; i >= 0; i-- {
-		row := rows[i]
-		if strings.TrimSpace(row.UserMessage) != "" {
-			messages = append(messages, summary.Message{Role: "Cliente", Text: row.UserMessage, At: row.CreatedAt})
-		}
-		if strings.TrimSpace(row.AIResponse) != "" {
-			role := "Bot"
-			if row.Model == "manual" {
-				role = "Operador"
-			}
-			messages = append(messages, summary.Message{Role: role, Text: row.AIResponse, At: row.CreatedAt})
-		}
-	}
-
-	key := ""
-	if len(rows) > 0 {
-		key = fmt.Sprintf("%s:%d", id, rows[0].ID)
-	}
-	res := h.summarizer.Summarize(ctx, key, summary.Input{
-		UserName:      user.Name,
-		Topic:         user.Topic,
-		NeedsOperator: resp.NeedsOperator,
-		HandoffReason: resp.HandoffReason,
-		Appointment:   resp.Appointment,
-		Messages:      messages,
+	writeJSON(w, http.StatusOK, operatorSummary{
+		UserID:        th.UserID,
+		Topic:         th.Topic,
+		AIEnabled:     th.AIEnabled,
+		NeedsOperator: th.NeedsOperator,
+		HandoffReason: th.HandoffReason,
+		Appointment:   th.Appointment,
+		Points:        th.Points,
+		Source:        th.Source,
+		Messages:      th.Messages,
+		LastMessageAt: th.LastMessageAt,
 	})
-	if res.Points != nil {
-		resp.Points = res.Points
-	}
-	resp.Source = res.Source
+}
 
-	writeJSON(w, http.StatusOK, resp)
+// threadSources agrupa las fuentes del resumen del hilo que usa el panel.
+func (h *adminHandlers) threadSources() summary.ThreadSources {
+	src := summary.ThreadSources{}
+	if h.interactions != nil {
+		src.Interactions = h.interactions
+	}
+	if h.users != nil {
+		src.Users = h.users
+	}
+	if h.appointments != nil {
+		src.Appointments = h.appointments
+	}
+	if h.services != nil {
+		src.Services = h.services
+	}
+	return src
 }
 
 func (h *adminHandlers) sendMessage(w http.ResponseWriter, r *http.Request) {

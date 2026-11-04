@@ -63,6 +63,12 @@ desactiva al terminar. Con el modo activo:
 - La respuesta del bot incluye una nota explicando el comportamiento real:
   `🧪 Nota de prueba: en producción, el bot se desactivaría en este punto para
   que atendiera un operador.`
+- A continuación se añade el **mismo resumen que vería el operador en el chat
+  del panel** (2–4 puntos), precedido de
+  `📋 Resumen que vería el operador en el panel:`.
+  Se genera con `summary.BuildThread`, la misma ruta que usa
+  `/admin/api/messages/{id}/summary`, y se cachea por usuario + última
+  interacción.
 - Las peticiones de cita (`request_appointment_scheduling`,
   `appointment_tamara`) ya marcaban el hilo como "requiere operador" sin
   desactivar la IA; no cambian.

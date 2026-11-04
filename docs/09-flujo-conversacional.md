@@ -202,7 +202,9 @@ Se ejecutan **antes** de enviar. Pueden modificar `reply.Text` o enviar cosas.
 > **Modo prueba** (`users.test_mode`): lo activa el tester antes de cada
 > conversación. En las derivaciones no desactiva la IA y añade
 > `🧪 Nota de prueba: en producción, el bot se desactivaría en este punto para
-> que atendiera un operador.` Al terminar la prueba se desactiva.
+> que atendiera un operador.` y, después, el resumen del panel
+> (`📋 Resumen que vería el operador en el panel:` + puntos). Al terminar la
+> prueba se desactiva.
 
 El título va antes de las acciones: `fix_chat` produce `*Asistente Virtual*` seguido de `📌 …`.
 

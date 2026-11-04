@@ -3,6 +3,35 @@
 > Registro de cambios de estado. Formato: fecha · tipo · cambios · archivos.
 > Histórico detallado de la reescritura (fases 0–7): `.old/docs/CHANGELOG.md`.
 
+## 2026-11-04 · Modo prueba: resumen del panel en la derivación
+
+### Añadido
+- `internal/summary/thread.go`: `BuildThread`/`Reader` extraen la construcción
+  del resumen del hilo (conversación + usuario + cita + servicio) para que el
+  panel y el bot usen exactamente la misma ruta.
+- En modo prueba, las derivaciones (`message_human_request`, `fix_chat`) añaden,
+  tras la nota, `📋 Resumen que vería el operador en el panel:` con los puntos
+  del resumen (máx. 12 s; si falla, solo se envía la nota).
+- Tests: `TestHandoffEnModoPruebaAñadeResumenDelPanel` y
+  `TestHandoffNormalNoAñadeResumen`.
+
+### Cambiado
+- `/admin/api/messages/{id}/summary` ahora delega en `summary.BuildThread`
+  (misma respuesta JSON).
+- `actions.NewRunner` recibe un `ThreadReader`; cableado en `cmd/botd`.
+- `addTestModeHandoff` centraliza nota + resumen en ambos caminos de derivación.
+
+### Verificación
+- `go build ./...`, `go vet ./...`, `go test ./...` OK.
+- Comprobado contra la BD de desarrollo con usuario/cita simulados: resumen
+  `fallback` y `ai` (OpenAI) generados correctamente (filas temporales borradas).
+
+### Archivos
+- `internal/summary/thread.go`, `internal/actions/runner.go`,
+  `internal/actions/runner_test.go`, `internal/httpapi/admin.go`,
+  `cmd/botd/main.go`, `docs/09-flujo-conversacional.md`,
+  `docs/12-bot-pruebas.md`, `docs/CHANGELOG.md`.
+
 ## 2026-11-04 · API pública desactivada en desarrollo y producción
 
 ### Añadido

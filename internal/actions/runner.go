@@ -9,9 +9,11 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/aibotia/aibotia-go/internal/domain"
 	"github.com/aibotia/aibotia-go/internal/pipeline"
+	"github.com/aibotia/aibotia-go/internal/summary"
 	"github.com/aibotia/aibotia-go/internal/whatsapp"
 )
 
@@ -20,10 +22,23 @@ type UserActivator interface {
 	SetActive(ctx context.Context, id string, active bool) error
 }
 
+// ThreadReader genera el resumen del hilo que vería el operador en el panel.
+type ThreadReader interface {
+	Thread(ctx context.Context, userID string) (summary.Thread, error)
+}
+
 // TestModeHandoffNote se añade a la respuesta cuando una acción de derivación
 // ocurre en modo prueba: el bot sigue activo, pero se explica qué pasaría en
 // producción.
 const TestModeHandoffNote = "🧪 Nota de prueba: en producción, el bot se desactivaría en este punto para que atendiera un operador."
+
+// TestModeSummaryHeading precede el resumen del panel que se adjunta en modo
+// prueba.
+const TestModeSummaryHeading = "📋 Resumen que vería el operador en el panel:"
+
+// testModeSummaryTimeout acota la generación del resumen para no retrasar la
+// respuesta al cliente si OpenAI tarda.
+const testModeSummaryTimeout = 12 * time.Second
 
 // Location es la ubicación del Studio.
 type Location struct {
@@ -73,14 +88,16 @@ type Runner struct {
 	log      *slog.Logger
 	users    UserActivator
 	provider whatsapp.Provider
+	threads  ThreadReader
 
 	mu       sync.RWMutex
 	location *Location
 }
 
-// NewRunner construye el ejecutor de acciones.
-func NewRunner(log *slog.Logger, users UserActivator, provider whatsapp.Provider, location *Location) *Runner {
-	r := &Runner{log: log, users: users, provider: provider}
+// NewRunner construye el ejecutor de acciones. threads puede ser nil: en ese
+// caso el modo prueba solo añade la nota, sin resumen.
+func NewRunner(log *slog.Logger, users UserActivator, provider whatsapp.Provider, location *Location, threads ThreadReader) *Runner {
+	r := &Runner{log: log, users: users, provider: provider, threads: threads}
 	r.SetLocation(location)
 	return r
 }
@@ -130,7 +147,7 @@ func (r *Runner) fixChat(ctx context.Context, user domain.User, reply *pipeline.
 	// whatsmeow no expone etiquetas/pin a alto nivel (son app-state); se aplica
 	// el efecto funcional (fijar en cola de "Pendientes" desactivando la IA).
 	if user.TestMode {
-		addTestModeNote(reply)
+		r.addTestModeHandoff(ctx, user, reply)
 		r.log.Info("fix_chat aplicado en modo prueba: mensaje marcado, IA activa", "user", user.ID)
 		return
 	}
@@ -143,7 +160,7 @@ func (r *Runner) fixChat(ctx context.Context, user domain.User, reply *pipeline.
 // real.
 func (r *Runner) handoff(ctx context.Context, user domain.User, reply *pipeline.Reply) {
 	if user.TestMode {
-		addTestModeNote(reply)
+		r.addTestModeHandoff(ctx, user, reply)
 		r.log.Info("handoff en modo prueba: la IA sigue activa", "user", user.ID)
 		return
 	}
@@ -161,6 +178,37 @@ func addTestModeNote(reply *pipeline.Reply) {
 		return
 	}
 	reply.Text = text + "\n\n" + TestModeHandoffNote
+}
+
+// addTestModeHandoff añade la nota de derivación y, a continuación, el resumen
+// que vería el operador en el panel.
+func (r *Runner) addTestModeHandoff(ctx context.Context, user domain.User, reply *pipeline.Reply) {
+	addTestModeNote(reply)
+	r.appendThreadSummary(ctx, user, reply)
+}
+
+// appendThreadSummary añade los puntos del resumen del hilo a la respuesta.
+func (r *Runner) appendThreadSummary(ctx context.Context, user domain.User, reply *pipeline.Reply) {
+	if r == nil || r.threads == nil || reply == nil {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, testModeSummaryTimeout)
+	defer cancel()
+
+	th, err := r.threads.Thread(ctx, user.ID)
+	if err != nil {
+		r.log.Warn("no se pudo generar el resumen del hilo en modo prueba", "user", user.ID, "error", err.Error())
+		return
+	}
+	points := th.Text()
+	if points == "" || strings.Contains(reply.Text, TestModeSummaryHeading) {
+		return
+	}
+	lines := strings.Split(points, "\n")
+	for i := range lines {
+		lines[i] = "• " + lines[i]
+	}
+	reply.Text = strings.TrimRight(reply.Text, "\n") + "\n\n" + TestModeSummaryHeading + "\n" + strings.Join(lines, "\n")
 }
 
 func (r *Runner) deactivate(ctx context.Context, userID string) {

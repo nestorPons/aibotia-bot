@@ -170,7 +170,16 @@ func run() error {
 			Address: cfg.LocationAddress,
 		}
 	}
-	actionRunner := actions.NewRunner(log, users, waProvider, location)
+	// Resúmenes del hilo (panel y modo prueba del bot).
+	threadSummarizer := summary.New(cfg.OpenAIAPIKey, cfg.OpenAIModel, log)
+	threadReader := summary.NewReader(summary.ThreadSources{
+		Interactions: interactions,
+		Users:        users,
+		Appointments: apptSvc,
+		Services:     services,
+	}, threadSummarizer)
+
+	actionRunner := actions.NewRunner(log, users, waProvider, location, threadReader)
 
 	// Recarga de contenido + ubicación del prompt de empresa.
 	reloader := &contentReloader{ai: ai, prompts: prompts, actions: actionRunner, log: log}
@@ -243,7 +252,6 @@ func run() error {
 	}
 
 	// Router HTTP.
-	threadSummarizer := summary.New(cfg.OpenAIAPIKey, cfg.OpenAIModel, log)
 	router := httpapi.NewRouter(httpapi.Deps{
 		Log:          log,
 		Config:       cfg,

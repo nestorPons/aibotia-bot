@@ -10,6 +10,7 @@ import (
 
 	"github.com/aibotia/aibotia-go/internal/domain"
 	"github.com/aibotia/aibotia-go/internal/pipeline"
+	"github.com/aibotia/aibotia-go/internal/summary"
 	"github.com/aibotia/aibotia-go/internal/whatsapp"
 )
 
@@ -76,7 +77,7 @@ func TestParsePin(t *testing.T) {
 }
 
 func TestSetLocationThreadSafe(t *testing.T) {
-	r := NewRunner(nil, nil, nil, nil)
+	r := NewRunner(nil, nil, nil, nil, nil)
 	if r.Location() != nil {
 		t.Fatal("esperaba ubicación nil")
 	}
@@ -113,7 +114,7 @@ func (s *stubProvider) SendText(_ context.Context, _, text string) (string, erro
 
 func TestSendLocationAction(t *testing.T) {
 	p := &stubProvider{}
-	r := NewRunner(slog.New(slog.NewTextHandler(io.Discard, nil)), nil, p, &Location{Lat: 39.4, Lng: -0.3, Name: "Studio", Address: "Calle 21"})
+	r := NewRunner(slog.New(slog.NewTextHandler(io.Discard, nil)), nil, p, &Location{Lat: 39.4, Lng: -0.3, Name: "Studio", Address: "Calle 21"}, nil)
 	if err := r.Run(context.Background(), domain.User{ID: "u1"}, &pipeline.Reply{Actions: []string{"send_location"}}); err != nil {
 		t.Fatal(err)
 	}
@@ -124,7 +125,7 @@ func TestSendLocationAction(t *testing.T) {
 
 func TestSendLocationFallback(t *testing.T) {
 	p := &stubProvider{failLocation: true}
-	r := NewRunner(slog.New(slog.NewTextHandler(io.Discard, nil)), nil, p, &Location{Lat: 39.4, Lng: -0.3, Name: "Studio", Address: "Calle 21"})
+	r := NewRunner(slog.New(slog.NewTextHandler(io.Discard, nil)), nil, p, &Location{Lat: 39.4, Lng: -0.3, Name: "Studio", Address: "Calle 21"}, nil)
 	if err := r.Run(context.Background(), domain.User{ID: "u1"}, &pipeline.Reply{Actions: []string{"send_location"}}); err != nil {
 		t.Fatal(err)
 	}
@@ -149,7 +150,7 @@ func (s *stubActivator) SetActive(_ context.Context, id string, active bool) err
 }
 
 func testRunner(users UserActivator) *Runner {
-	return NewRunner(slog.New(slog.NewTextHandler(io.Discard, nil)), users, nil, nil)
+	return NewRunner(slog.New(slog.NewTextHandler(io.Discard, nil)), users, nil, nil, nil)
 }
 
 func TestHandoffNormalDesactivaIA(t *testing.T) {
@@ -199,6 +200,18 @@ func TestFixChatEnModoPruebaMantieneIA(t *testing.T) {
 	}
 }
 
+// stubThreadReader devuelve un resumen fijo del hilo.
+type stubThreadReader struct {
+	thread summary.Thread
+	err    error
+	calls  int
+}
+
+func (s *stubThreadReader) Thread(context.Context, string) (summary.Thread, error) {
+	s.calls++
+	return s.thread, s.err
+}
+
 func TestNotaModoPruebaNoSeDuplica(t *testing.T) {
 	reply := &pipeline.Reply{
 		Text:    "Hola",
@@ -210,5 +223,49 @@ func TestNotaModoPruebaNoSeDuplica(t *testing.T) {
 	}
 	if got := strings.Count(reply.Text, TestModeHandoffNote); got != 1 {
 		t.Fatalf("nota repetida %d veces: %q", got, reply.Text)
+	}
+}
+
+func TestHandoffEnModoPruebaAñadeResumenDelPanel(t *testing.T) {
+	threads := &stubThreadReader{thread: summary.Thread{
+		Points: []string{"Tema detectado: laser diodo", "Preferencia horaria: tardes"},
+	}}
+	r := NewRunner(slog.New(slog.NewTextHandler(io.Discard, nil)), &stubActivator{}, nil, nil, threads)
+	reply := &pipeline.Reply{Text: "Te paso con una persona.", Actions: []string{"message_human_request"}}
+
+	if err := r.Run(context.Background(), domain.User{ID: "u1", TestMode: true}, reply); err != nil {
+		t.Fatal(err)
+	}
+	if threads.calls != 1 {
+		t.Fatalf("llamadas al resumen = %d, quiero 1", threads.calls)
+	}
+	if !strings.Contains(reply.Text, TestModeHandoffNote) {
+		t.Fatalf("falta la nota de prueba: %q", reply.Text)
+	}
+	if !strings.Contains(reply.Text, TestModeSummaryHeading) {
+		t.Fatalf("falta la cabecera del resumen: %q", reply.Text)
+	}
+	if !strings.Contains(reply.Text, "• Tema detectado: laser diodo") ||
+		!strings.Contains(reply.Text, "• Preferencia horaria: tardes") {
+		t.Fatalf("faltan puntos del resumen: %q", reply.Text)
+	}
+	if !strings.Contains(reply.Text, "persona.\n\n"+TestModeHandoffNote+"\n\n") {
+		t.Fatalf("el resumen debe ir después de la nota: %q", reply.Text)
+	}
+}
+
+func TestHandoffNormalNoAñadeResumen(t *testing.T) {
+	threads := &stubThreadReader{thread: summary.Thread{Points: []string{"algo"}}}
+	r := NewRunner(slog.New(slog.NewTextHandler(io.Discard, nil)), &stubActivator{}, nil, nil, threads)
+	reply := &pipeline.Reply{Text: "Te paso con una persona.", Actions: []string{"message_human_request"}}
+
+	if err := r.Run(context.Background(), domain.User{ID: "u1"}, reply); err != nil {
+		t.Fatal(err)
+	}
+	if threads.calls != 0 {
+		t.Fatalf("no debe generar resumen fuera del modo prueba (llamadas = %d)", threads.calls)
+	}
+	if strings.Contains(reply.Text, TestModeSummaryHeading) {
+		t.Fatalf("respuesta = %q", reply.Text)
 	}
 }

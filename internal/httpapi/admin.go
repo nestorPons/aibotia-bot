@@ -993,12 +993,19 @@ func (h *adminHandlers) whatsappStatus(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 	st := h.wa.Status()
-	writeJSON(w, http.StatusOK, map[string]any{
+	code := h.wa.QRCode()
+	resp := map[string]any{
 		"enabled":      true,
 		"status":       string(st),
-		"qr_available": h.wa.QRCode() != "",
+		"qr_available": code != "",
 		"paired":       st == whatsapp.StatusConnected,
-	})
+	}
+	if code != "" {
+		// Huella corta del QR: el panel solo recarga la imagen cuando cambia.
+		sum := sha256.Sum256([]byte(code))
+		resp["qr_token"] = fmt.Sprintf("%x", sum[:4])
+	}
+	writeJSON(w, http.StatusOK, resp)
 }
 
 // whatsappReconnect reinicia el canal y, si no hay sesión, genera un QR nuevo.

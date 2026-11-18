@@ -32,8 +32,11 @@ const (
 	// qrRetryDelay es la pausa entre tandas de QR cuando la anterior caduca
 	// sin escanearse (cada tanda dura ~2,5 min).
 	qrRetryDelay = 3 * time.Second
-	// qrMaxAttempts limita las tandas seguidas (~25 min en total).
+	// qrMaxAttempts es el número de tandas seguidas antes de espaciar la
+	// regeneración (no se abandona el emparejamiento).
 	qrMaxAttempts = 10
+	// qrLongRetryDelay es la pausa entre tandas cuando se supera ese número.
+	qrLongRetryDelay = 45 * time.Second
 )
 
 // Client implementa Provider sobre whatsmeow.
@@ -232,10 +235,12 @@ func (c *Client) stopPairing() {
 }
 
 // pairLoop mantiene vigente un QR mientras no haya sesión: cada vez que una
-// tanda caduca genera otra, hasta qrMaxAttempts.
+// tanda caduca genera otra. No se rinde, para que el panel tenga siempre un
+// código disponible; a partir de qrMaxAttempts espacia las tandas para no
+// martillear los servidores de WhatsApp.
 func (c *Client) pairLoop(ctx context.Context) {
 	log := c.opts.Log
-	for attempt := 1; attempt <= qrMaxAttempts; attempt++ {
+	for attempt := 1; ; attempt++ {
 		if ctx.Err() != nil {
 			return
 		}
@@ -256,7 +261,7 @@ func (c *Client) pairLoop(ctx context.Context) {
 			return
 		}
 		c.setStatus(StatusWaitingQR)
-		log.Info("whatsapp: esperando escaneo del QR", "intento", attempt, "max", qrMaxAttempts)
+		log.Info("whatsapp: esperando escaneo del QR", "intento", attempt)
 
 		if !c.consumeQR(ctx, qrChan) {
 			return
@@ -267,16 +272,17 @@ func (c *Client) pairLoop(ctx context.Context) {
 		wa.Disconnect()
 		c.qr.Store("")
 		c.setStatus(StatusWaitingQR)
+
+		delay := qrRetryDelay
+		if attempt >= qrMaxAttempts {
+			delay = qrLongRetryDelay
+		}
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(qrRetryDelay):
+		case <-time.After(delay):
 		}
 	}
-
-	c.qr.Store("")
-	c.setStatus(StatusDisconnected)
-	c.opts.Log.Warn("whatsapp: QR caducado sin escanear; pide uno nuevo desde el panel")
 }
 
 // Status devuelve el estado actual.

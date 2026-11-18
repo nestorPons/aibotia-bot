@@ -254,6 +254,9 @@
   .wa-qr img { border:1px solid var(--line); border-radius:6px; background:#fff; padding:10px; }
   .wa-qr p { color:var(--muted); font-size:12px; max-width:340px; margin:12px auto 0; }
   .wa-actions { margin-top:16px; display:flex; gap:8px; }
+  /* Mientras se genera el siguiente código: se atenúa, nunca desaparece. */
+  .wa-qr.is-stale img { opacity:.25; }
+  .wa-qr.is-stale p { color:var(--warn, var(--muted)); }
 
   /* Ajustes */
   .settings-card { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:18px 20px; max-width:640px; display:flex; flex-direction:column; gap:16px; }
@@ -444,7 +447,17 @@
       <h2>WhatsApp</h2>
       <span class="muted">Estado de la conexión y vinculación por QR</span>
     </div>
-    <div class="wa-card" id="waCard"></div>
+    <div class="wa-card" id="waCard">
+      <div class="wa-status">WhatsApp <span id="waPill"></span></div>
+      <div class="muted" id="waState">Cargando estado…</div>
+      <div class="wa-qr hidden" id="waQrBox">
+        <img id="waQrImg" width="280" height="280" alt="Código QR de WhatsApp">
+        <p id="waQrHint">Abre WhatsApp en el móvil → Dispositivos vinculados → Vincular dispositivo y escanea este código.</p>
+      </div>
+      <div class="wa-actions hidden" id="waActions">
+        <button type="button" id="waReload">Generar QR</button>
+      </div>
+    </div>
   </section>
 </main>
 
@@ -594,15 +607,15 @@ function switchTab(tab) {
     $('#view' + id).classList.toggle('hidden', key !== tab);
     $('#tab' + id).classList.toggle('active', key === tab);
   }
-  if (tab !== 'whatsapp') stopWhatsAppPolling();
+  stopWhatsAppPolling();
   if (tab === 'company') loadCompany().catch((e) => toast(e.message, true));
   if (tab === 'messages') loadThreads().catch((e) => toast(e.message, true));
   if (tab === 'users') loadUsers().catch((e) => toast(e.message, true));
   if (tab === 'settings') loadSettings().catch((e) => toast(e.message, true));
   if (tab === 'whatsapp') {
     loadWhatsApp();
-    // El QR rota cada ~20 s: refrescar estado e imagen mientras se ve la pestaña.
-    waTimer = setInterval(() => loadWhatsApp(), 5000);
+    // El QR rota cada ~20 s: el sondeo solo recarga la imagen si cambia la huella.
+    waTimer = setInterval(() => loadWhatsApp(), 4000);
   }
 }
 
@@ -1541,34 +1554,66 @@ $('#activateNewUsers').addEventListener('change', async (e) => {
 });
 
 // --- WhatsApp --------------------------------------------------------------
+const WA_QR_HINT = 'Abre WhatsApp en el móvil → Dispositivos vinculados → Vincular dispositivo y escanea este código.';
+let waToken = '';
+
 async function loadWhatsApp() {
   let st;
   try {
     st = await api('/whatsapp');
   } catch (err) {
-    $('#waCard').innerHTML = '<div class="muted">No se pudo leer el estado</div>';
+    $('#waState').textContent = 'No se pudo leer el estado';
     return;
   }
   const status = st.status;
-  const pill = status === 'connected' ? '<span class="pill on">conectado</span>'
+  $('#waPill').innerHTML = status === 'connected' ? '<span class="pill on">conectado</span>'
     : status === 'waiting_qr' ? '<span class="pill off">esperando QR</span>'
     : status === 'logged_out' ? '<span class="pill off">sesión cerrada</span>'
     : '<span class="pill off">desconectado</span>';
-  let html = `<div class="wa-status">WhatsApp ${pill}</div><div class="muted">Estado: ${esc(status)}</div>`;
-  if (st.qr_available && status !== 'connected') {
-    html += `<div class="wa-qr"><img src="/admin/api/whatsapp/qr.png?t=${Date.now()}" width="280" height="280" alt="QR">
-      <p>Abre WhatsApp en el móvil → Dispositivos vinculados → Vincular dispositivo y escanea este código.</p></div>`;
-  } else if (status === 'connected') {
-    html += '<div class="muted" style="margin-top:10px">El dispositivo está vinculado y operativo.</div>';
-  } else if (status === 'waiting_qr') {
-    html += '<div class="muted" style="margin-top:10px">Generando un QR nuevo… el código aparecerá en unos segundos.</div>';
+
+  const box = $('#waQrBox');
+  const actions = $('#waActions');
+
+  if (status === 'connected') {
+    $('#waState').textContent = 'El dispositivo está vinculado y operativo.';
+    box.classList.add('hidden');
+    actions.classList.add('hidden');
+    return;
+  }
+
+  $('#waState').textContent = status === 'logged_out'
+    ? 'WhatsApp cerró la sesión: hay que vincular el dispositivo otra vez.'
+    : 'Estado: ' + status;
+  actions.classList.remove('hidden');
+  $('#waReload').textContent = st.qr_available ? 'Generar otro QR' : 'Generar QR';
+
+  if (st.qr_available && st.qr_token) {
+    box.classList.remove('hidden');
+    if (st.qr_token !== waToken) {
+      // Precarga: se cambia el src solo cuando la nueva imagen está lista.
+      const img = new Image();
+      img.onload = () => {
+        $('#waQrImg').src = img.src;
+        waToken = st.qr_token;
+        box.classList.remove('is-stale');
+        $('#waQrHint').textContent = WA_QR_HINT;
+      };
+      img.src = '/admin/api/whatsapp/qr.png?t=' + encodeURIComponent(st.qr_token);
+    } else {
+      box.classList.remove('is-stale');
+      $('#waQrHint').textContent = WA_QR_HINT;
+    }
+    return;
+  }
+
+  // Sin código todavía (entre tandas): se mantiene el último visible, atenuado.
+  if (waToken) {
+    box.classList.remove('hidden');
+    box.classList.add('is-stale');
+    $('#waQrHint').textContent = 'Generando un código nuevo… espera unos segundos.';
   } else {
-    html += '<div class="muted" style="margin-top:10px">Sin dispositivo vinculado: no se reciben mensajes hasta emparejar el móvil.</div>';
+    box.classList.add('hidden');
   }
-  if (status !== 'connected') {
-    html += `<div class="wa-actions"><button type="button" id="waReload">${st.qr_available ? 'Generar otro QR' : 'Generar QR'}</button></div>`;
-  }
-  $('#waCard').innerHTML = html;
 }
 
 function stopWhatsAppPolling() {
@@ -1584,6 +1629,7 @@ $('#waCard').addEventListener('click', async (e) => {
   btn.disabled = true;
   btn.textContent = 'Generando…';
   try {
+    waToken = '';
     await api('/whatsapp/reconnect', { method: 'POST' });
     await loadWhatsApp();
     toast('Conexión de WhatsApp reiniciada');

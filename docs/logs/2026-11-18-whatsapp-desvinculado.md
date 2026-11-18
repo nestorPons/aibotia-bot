@@ -20,8 +20,8 @@ Sin dispositivo vinculado no entran eventos `events.Message`, por eso no respond
 - Vinculación manual: panel `https://aibotia.com/admin` → pestaña WhatsApp (QR válido ~160 s).
 
 ## Corrección aplicada
-- `pairLoop`: al caducar una tanda de QR pide otra automáticamente (3 s de pausa,
-  hasta 10 tandas ≈ 25 min) mientras siga sin vincular.
+- `pairLoop`: al caducar una tanda de QR pide otra automáticamente, **sin
+  límite** (3 s de pausa; a partir de 10 tandas, 45 s) mientras siga sin vincular.
 - `Provider.Reconnect`: reconecta si hay sesión; si el device fue borrado por
   WhatsApp (`events.LoggedOut` → `Store.Deleted`) reconstruye el cliente sobre
   un device vacío y reabre el emparejamiento.
@@ -30,8 +30,18 @@ Sin dispositivo vinculado no entran eventos `events.Message`, por eso no respond
 - `clientMu` protege el puntero `whatsmeow.Client`, que ahora puede cambiar en
   caliente.
 
+### QR en blanco (2.ª iteración)
+- Causas: el bucle se rendía a las 10 tandas (≈25 min sin QR) y el panel
+  recreaba el `<img>` en cada sondeo, dejando un hueco blanco mientras cargaba;
+  entre tandas `qr_available=false` ocultaba la imagen.
+- Solución: regeneración indefinida, `qr_token` (huella sha256 del código) para
+  no recargar si no cambia, tarjeta con nodos estables, precarga de la imagen y
+  último QR atenuado durante el hueco. Sondeo cada 4 s sin acumular intervalos.
+
 ### Verificación
 - `go build ./...`, `go vet` y tests de `internal/whatsapp` OK.
+- Dispositivo vinculado el 18-nov 11:04 (`34686115433:2@s.whatsapp.net`,
+  push name «Tester»): `Successfully authenticated` + `whatsapp conectado`.
 - `TestEventsStreamEnvíaEventos` (httpapi) es inestable por una carrera del
   propio test (falla igual en `HEAD`): no relacionado con este cambio.
 

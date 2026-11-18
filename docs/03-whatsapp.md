@@ -27,16 +27,18 @@
 2. `GetFirstDevice`:
    - Sin device → estado `waiting_qr`, y el bucle `pairLoop` pide `GetQRChannel` +
      `Connect`: cada tanda dura ~2,5 min y, al caducar (`timeout`), genera otra
-     hasta `qrMaxAttempts` (10 ≈ 25 min). `success` → `connected`.
+     sin límite (a partir de 10 tandas espera 45 s entre ellas). `success` →
+     `connected`.
    - Con device → `Connect` directo y estado `connected`.
 3. Eventos manejados: `Connected`, `Disconnected`, `LoggedOut` (sesión invalidada:
    whatsmeow borra el device), `Message`.
 4. `Reconnect` (panel) cancela el bucle previo, desconecta y reconstruye el
    cliente si el device fue borrado.
 
-QR: panel `/admin` (pestaña WhatsApp, se refresca cada 5 s) y
-`GET /admin/api/whatsapp/qr.png`; también `GET /api/v1/whatsapp/qr` y SSE
-(`event: qr`) si `API_ENABLED=true`.
+QR: panel `/admin` (pestaña WhatsApp). El sondeo cada 4 s compara `qr_token`
+(huella corta del código) y solo recarga la imagen cuando cambia; entre tandas
+se mantiene la última imagen atenuada. Endpoints: `GET /admin/api/whatsapp/qr.png`,
+y con `API_ENABLED=true` también `GET /api/v1/whatsapp/qr` y SSE (`event: qr`).
 
 ## Normalización de entrada
 

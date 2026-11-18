@@ -253,6 +253,7 @@
   .wa-qr { margin-top:16px; text-align:center; }
   .wa-qr img { border:1px solid var(--line); border-radius:6px; background:#fff; padding:10px; }
   .wa-qr p { color:var(--muted); font-size:12px; max-width:340px; margin:12px auto 0; }
+  .wa-actions { margin-top:16px; display:flex; gap:8px; }
 
   /* Ajustes */
   .settings-card { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:18px 20px; max-width:640px; display:flex; flex-direction:column; gap:16px; }
@@ -586,16 +587,23 @@ const TABS = {
   settings: 'Settings',
   whatsapp: 'WhatsApp',
 };
+let waTimer = null;
+
 function switchTab(tab) {
   for (const [key, id] of Object.entries(TABS)) {
     $('#view' + id).classList.toggle('hidden', key !== tab);
     $('#tab' + id).classList.toggle('active', key === tab);
   }
+  if (tab !== 'whatsapp') stopWhatsAppPolling();
   if (tab === 'company') loadCompany().catch((e) => toast(e.message, true));
   if (tab === 'messages') loadThreads().catch((e) => toast(e.message, true));
   if (tab === 'users') loadUsers().catch((e) => toast(e.message, true));
   if (tab === 'settings') loadSettings().catch((e) => toast(e.message, true));
-  if (tab === 'whatsapp') loadWhatsApp();
+  if (tab === 'whatsapp') {
+    loadWhatsApp();
+    // El QR rota cada ~20 s: refrescar estado e imagen mientras se ve la pestaña.
+    waTimer = setInterval(() => loadWhatsApp(), 5000);
+  }
 }
 
 // --- Servicios -------------------------------------------------------------
@@ -1533,7 +1541,6 @@ $('#activateNewUsers').addEventListener('change', async (e) => {
 });
 
 // --- WhatsApp --------------------------------------------------------------
-let waTimer;
 async function loadWhatsApp() {
   let st;
   try {
@@ -1550,14 +1557,42 @@ async function loadWhatsApp() {
   let html = `<div class="wa-status">WhatsApp ${pill}</div><div class="muted">Estado: ${esc(status)}</div>`;
   if (st.qr_available && status !== 'connected') {
     html += `<div class="wa-qr"><img src="/admin/api/whatsapp/qr.png?t=${Date.now()}" width="280" height="280" alt="QR">
-      <p>Abre WhatsApp en el móvil → Ajustes → Dispositivos vinculados → Vincular dispositivo y escanea este código.</p></div>`;
+      <p>Abre WhatsApp en el móvil → Dispositivos vinculados → Vincular dispositivo y escanea este código.</p></div>`;
   } else if (status === 'connected') {
     html += '<div class="muted" style="margin-top:10px">El dispositivo está vinculado y operativo.</div>';
+  } else if (status === 'waiting_qr') {
+    html += '<div class="muted" style="margin-top:10px">Generando un QR nuevo… el código aparecerá en unos segundos.</div>';
   } else {
-    html += '<div class="muted" style="margin-top:10px">No hay QR disponible. Reinicia el bot si necesitas vincular un nuevo dispositivo.</div>';
+    html += '<div class="muted" style="margin-top:10px">Sin dispositivo vinculado: no se reciben mensajes hasta emparejar el móvil.</div>';
+  }
+  if (status !== 'connected') {
+    html += `<div class="wa-actions"><button type="button" id="waReload">${st.qr_available ? 'Generar otro QR' : 'Generar QR'}</button></div>`;
   }
   $('#waCard').innerHTML = html;
 }
+
+function stopWhatsAppPolling() {
+  if (waTimer) {
+    clearInterval(waTimer);
+    waTimer = null;
+  }
+}
+
+$('#waCard').addEventListener('click', async (e) => {
+  const btn = e.target.closest('#waReload');
+  if (!btn) return;
+  btn.disabled = true;
+  btn.textContent = 'Generando…';
+  try {
+    await api('/whatsapp/reconnect', { method: 'POST' });
+    await loadWhatsApp();
+    toast('Conexión de WhatsApp reiniciada');
+  } catch (err) {
+    toast(err.message, true);
+    btn.disabled = false;
+    btn.textContent = 'Generar QR';
+  }
+});
 
 // --- Eventos ---------------------------------------------------------------
 $('#tabServices').addEventListener('click', () => switchTab('services'));

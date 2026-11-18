@@ -1,12 +1,50 @@
 package whatsapp
 
 import (
+	"context"
+	"io"
+	"log/slog"
 	"strings"
 	"testing"
 
+	"go.mau.fi/whatsmeow"
 	"go.mau.fi/whatsmeow/proto/waE2E"
 	"google.golang.org/protobuf/proto"
 )
+
+func testClient() *Client {
+	return New(Options{Log: slog.New(slog.NewTextHandler(io.Discard, nil))})
+}
+
+func TestConsumeQRPideOtraTandaAlCaducar(t *testing.T) {
+	c := testClient()
+	ch := make(chan whatsmeow.QRChannelItem, 1)
+	ch <- whatsmeow.QRChannelTimeout
+	if !c.consumeQR(context.Background(), ch) {
+		t.Fatal("un QR caducado debe pedir otra tanda")
+	}
+}
+
+func TestConsumeQRSeDetieneAlVincular(t *testing.T) {
+	c := testClient()
+	ch := make(chan whatsmeow.QRChannelItem, 1)
+	ch <- whatsmeow.QRChannelSuccess
+	if c.consumeQR(context.Background(), ch) {
+		t.Fatal("tras vincular no hay que pedir otra tanda")
+	}
+	if c.Status() != StatusConnected {
+		t.Fatalf("status = %q, quiero %q", c.Status(), StatusConnected)
+	}
+}
+
+func TestConsumeQRSeDetieneAlCancelar(t *testing.T) {
+	c := testClient()
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if c.consumeQR(ctx, make(chan whatsmeow.QRChannelItem)) {
+		t.Fatal("con el contexto cancelado no hay que reintentar")
+	}
+}
 
 func TestMessageText(t *testing.T) {
 	cases := []struct {

@@ -19,17 +19,24 @@
 | `MarkSeen` / `SendTyping` | Recibos de lectura y presencia. |
 | `GetContact` / `ListContacts` | Consulta e importación de contactos. |
 | `Logout` | Cierra sesión (requiere nuevo QR). |
+| `Reconnect` | Reconecta si hay sesión; si no la hay (o WhatsApp la invalidó) vuelve a emparejar por QR. |
 
 ## Ciclo de sesión
 
 1. `sqlstore.Upgrade` crea/actualiza las tablas de whatsmeow en PostgreSQL.
 2. `GetFirstDevice`:
-   - Sin device → estado `waiting_qr`, `GetQRChannel` + `Connect`, y una goroutine
-     consume códigos QR (`success` → `connected`, `timeout` → `disconnected`).
+   - Sin device → estado `waiting_qr`, y el bucle `pairLoop` pide `GetQRChannel` +
+     `Connect`: cada tanda dura ~2,5 min y, al caducar (`timeout`), genera otra
+     hasta `qrMaxAttempts` (10 ≈ 25 min). `success` → `connected`.
    - Con device → `Connect` directo y estado `connected`.
-3. Eventos manejados: `Connected`, `Disconnected`, `LoggedOut`, `Message`.
+3. Eventos manejados: `Connected`, `Disconnected`, `LoggedOut` (sesión invalidada:
+   whatsmeow borra el device), `Message`.
+4. `Reconnect` (panel) cancela el bucle previo, desconecta y reconstruye el
+   cliente si el device fue borrado.
 
-QR: logs del proceso y `GET /api/v1/whatsapp/qr`; también por SSE (`event: qr`).
+QR: panel `/admin` (pestaña WhatsApp, se refresca cada 5 s) y
+`GET /admin/api/whatsapp/qr.png`; también `GET /api/v1/whatsapp/qr` y SSE
+(`event: qr`) si `API_ENABLED=true`.
 
 ## Normalización de entrada
 

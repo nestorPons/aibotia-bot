@@ -28,12 +28,24 @@ type Options struct {
 	Queue int
 }
 
+const (
+	// qrRetryDelay es la pausa entre tandas de QR cuando la anterior caduca
+	// sin escanearse (cada tanda dura ~2,5 min).
+	qrRetryDelay = 3 * time.Second
+	// qrMaxAttempts limita las tandas seguidas (~25 min en total).
+	qrMaxAttempts = 10
+)
+
 // Client implementa Provider sobre whatsmeow.
 type Client struct {
 	opts Options
 
-	wa *whatsmeow.Client
-	db *sql.DB
+	db        *sql.DB
+	container *sqlstore.Container
+
+	// clientMu protege el puntero wa, que se reemplaza al revincular.
+	clientMu sync.RWMutex
+	wa       *whatsmeow.Client
 
 	incoming chan IncomingMessage
 	status   atomic.Value // Status
@@ -43,9 +55,11 @@ type Client struct {
 	mediaCache map[string]*waE2E.Message
 	mediaOrder []string
 
-	mu       sync.Mutex
-	started  bool
-	stopOnce sync.Once
+	mu         sync.Mutex
+	pairMu     sync.Mutex
+	pairCancel context.CancelFunc
+	started    bool
+	stopOnce   sync.Once
 }
 
 // New construye un Client sin conectarse.
@@ -87,43 +101,45 @@ func (c *Client) Start(ctx context.Context) error {
 		return fmt.Errorf("whatsapp: migrar store: %w", err)
 	}
 
-	device, err := container.GetFirstDevice(ctx)
-	if err != nil {
+	c.db = db
+	c.container = container
+	c.started = true
+
+	if err := c.connectLocked(ctx); err != nil {
 		_ = db.Close()
+		return err
+	}
+	log.Info("whatsapp iniciado", "paired", c.paired())
+	return nil
+}
+
+// connectLocked construye el cliente whatsmeow a partir del store y arranca la
+// conexión (o el emparejamiento por QR si no hay dispositivo vinculado).
+// Debe llamarse con c.mu tomado.
+func (c *Client) connectLocked(ctx context.Context) error {
+	device, err := c.container.GetFirstDevice(ctx)
+	if err != nil {
 		return fmt.Errorf("whatsapp: obtener device: %w", err)
 	}
 
-	c.db = db
-	c.wa = whatsmeow.NewClient(device, newWALogger(log))
-	c.wa.EnableAutoReconnect = true
+	wa := whatsmeow.NewClient(device, newWALogger(c.opts.Log))
+	wa.EnableAutoReconnect = true
 	// Si el primer connect falla por red/DNS, whatsmeow reintenta en segundo
 	// plano en lugar de dejar el canal muerto hasta el siguiente reinicio.
-	c.wa.InitialAutoReconnect = true
-	c.wa.AddEventHandler(c.handleEvent)
+	wa.InitialAutoReconnect = true
+	wa.AddEventHandler(c.handleEvent)
+	c.setClient(wa)
 
-	if c.wa.Store.ID == nil {
-		// Primera ejecución: hay que emparejar mediante QR.
-		qrChan, err := c.wa.GetQRChannel(ctx)
-		if err != nil {
-			_ = db.Close()
-			return fmt.Errorf("whatsapp: canal QR: %w", err)
-		}
-		c.setStatus(StatusWaitingQR)
-		if err := c.wa.Connect(); err != nil {
-			_ = db.Close()
-			return fmt.Errorf("whatsapp: connect: %w", err)
-		}
-		go c.consumeQR(ctx, qrChan)
-	} else {
-		if err := c.wa.Connect(); err != nil {
-			_ = db.Close()
-			return fmt.Errorf("whatsapp: connect: %w", err)
-		}
-		log.Info("whatsapp: conexión iniciada", "paired", true)
+	if device.ID == nil {
+		// Primera ejecución (o sesión invalidada): emparejar mediante QR.
+		c.startPairing(ctx)
+		return nil
 	}
 
-	c.started = true
-	log.Info("whatsapp iniciado", "paired", c.wa.Store.ID != nil)
+	if err := wa.Connect(); err != nil {
+		return fmt.Errorf("whatsapp: connect: %w", err)
+	}
+	c.opts.Log.Info("whatsapp: conexión iniciada", "paired", true)
 	return nil
 }
 
@@ -132,13 +148,135 @@ func (c *Client) Stop() {
 	c.stopOnce.Do(func() {
 		c.mu.Lock()
 		defer c.mu.Unlock()
-		if c.wa != nil {
-			c.wa.Disconnect()
+		c.stopPairing()
+		if wa := c.current(); wa != nil {
+			wa.Disconnect()
 		}
 		if c.db != nil {
 			_ = c.db.Close()
 		}
 	})
+}
+
+// Reconnect reinicia el canal. Si la sesión sigue vinculada solo reconecta; si
+// no hay dispositivo (o WhatsApp lo invalidó) vuelve a generar un QR.
+func (c *Client) Reconnect(ctx context.Context) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if !c.started || c.container == nil {
+		return ErrNotConnected
+	}
+
+	c.stopPairing()
+	wa := c.current()
+	if wa != nil && wa.IsConnected() {
+		wa.Disconnect()
+	}
+
+	// whatsmeow marca el device como borrado cuando WhatsApp cierra la sesión:
+	// hay que construir un cliente nuevo sobre un device vacío.
+	if wa == nil || wa.Store.Deleted || wa.Store.ID == nil {
+		c.qr.Store("")
+		c.setStatus(StatusDisconnected)
+		return c.connectLocked(ctx)
+	}
+
+	c.setStatus(StatusDisconnected)
+	if err := wa.Connect(); err != nil {
+		return fmt.Errorf("whatsapp: reconectar: %w", err)
+	}
+	c.opts.Log.Info("whatsapp: reconexión solicitada")
+	return nil
+}
+
+// paired indica si hay una sesión de WhatsApp vinculada en el store.
+func (c *Client) paired() bool {
+	wa := c.current()
+	return wa != nil && wa.Store != nil && wa.Store.ID != nil
+}
+
+func (c *Client) current() *whatsmeow.Client {
+	c.clientMu.RLock()
+	defer c.clientMu.RUnlock()
+	return c.wa
+}
+
+func (c *Client) setClient(wa *whatsmeow.Client) {
+	c.clientMu.Lock()
+	c.wa = wa
+	c.clientMu.Unlock()
+}
+
+// startPairing lanza en segundo plano el emparejamiento por QR.
+func (c *Client) startPairing(parent context.Context) {
+	// El bucle sobrevive al contexto que lo lanzó (p. ej. una petición HTTP
+	// del panel): solo se detiene al cancelarlo o al cerrar el proceso.
+	ctx, cancel := context.WithCancel(context.WithoutCancel(parent))
+	c.pairMu.Lock()
+	if c.pairCancel != nil {
+		c.pairCancel()
+	}
+	c.pairCancel = cancel
+	c.pairMu.Unlock()
+
+	go c.pairLoop(ctx)
+}
+
+func (c *Client) stopPairing() {
+	c.pairMu.Lock()
+	if c.pairCancel != nil {
+		c.pairCancel()
+		c.pairCancel = nil
+	}
+	c.pairMu.Unlock()
+}
+
+// pairLoop mantiene vigente un QR mientras no haya sesión: cada vez que una
+// tanda caduca genera otra, hasta qrMaxAttempts.
+func (c *Client) pairLoop(ctx context.Context) {
+	log := c.opts.Log
+	for attempt := 1; attempt <= qrMaxAttempts; attempt++ {
+		if ctx.Err() != nil {
+			return
+		}
+		wa := c.current()
+		if wa == nil {
+			return
+		}
+
+		qrChan, err := wa.GetQRChannel(ctx)
+		if err != nil {
+			log.Error("whatsapp: no se pudo abrir el canal QR", "error", err.Error())
+			c.setStatus(StatusDisconnected)
+			return
+		}
+		if err := wa.Connect(); err != nil {
+			log.Error("whatsapp: no se pudo conectar para emparejar", "error", err.Error())
+			c.setStatus(StatusDisconnected)
+			return
+		}
+		c.setStatus(StatusWaitingQR)
+		log.Info("whatsapp: esperando escaneo del QR", "intento", attempt, "max", qrMaxAttempts)
+
+		if !c.consumeQR(ctx, qrChan) {
+			return
+		}
+
+		// Tanda caducada: la librería desconecta sola, pero nos aseguramos
+		// antes de pedir un canal nuevo.
+		wa.Disconnect()
+		c.qr.Store("")
+		c.setStatus(StatusWaitingQR)
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(qrRetryDelay):
+		}
+	}
+
+	c.qr.Store("")
+	c.setStatus(StatusDisconnected)
+	c.opts.Log.Warn("whatsapp: QR caducado sin escanear; pide uno nuevo desde el panel")
 }
 
 // Status devuelve el estado actual.
@@ -160,14 +298,16 @@ func (c *Client) setStatus(s Status) {
 	c.status.Store(s)
 }
 
-func (c *Client) consumeQR(ctx context.Context, ch <-chan whatsmeow.QRChannelItem) {
+// consumeQR procesa una tanda de códigos QR. Devuelve true si conviene pedir
+// otra tanda (caducó o falló) y false si hay que parar (vinculado o cancelado).
+func (c *Client) consumeQR(ctx context.Context, ch <-chan whatsmeow.QRChannelItem) bool {
 	for {
 		select {
 		case <-ctx.Done():
-			return
+			return false
 		case evt, ok := <-ch:
 			if !ok {
-				return
+				return false
 			}
 			switch evt.Event {
 			case "code":
@@ -177,17 +317,32 @@ func (c *Client) consumeQR(ctx context.Context, ch <-chan whatsmeow.QRChannelIte
 			case "success":
 				c.qr.Store("")
 				c.setStatus(StatusConnected)
+				c.opts.Log.Info("whatsapp: dispositivo vinculado")
+				return false
 			case "timeout":
 				c.qr.Store("")
-				c.setStatus(StatusDisconnected)
-				c.opts.Log.Warn("QR de WhatsApp caducado; reinicia para generar uno nuevo")
-				return
+				c.opts.Log.Warn("QR de WhatsApp caducado; generando uno nuevo")
+				return true
 			case "error":
-				c.opts.Log.Error("error en emparejamiento WhatsApp", "error", evt.Error)
-				return
+				c.qr.Store("")
+				c.opts.Log.Error("error en emparejamiento WhatsApp", "error", errText(evt.Error))
+				return true
+			default:
+				// err-scanned-without-multidevice, err-client-outdated, etc.
+				c.qr.Store("")
+				c.opts.Log.Warn("aviso de emparejamiento WhatsApp", "evento", evt.Event, "error", errText(evt.Error))
+				return true
 			}
 		}
 	}
+}
+
+// errText evita imprimir "<nil>" en los logs.
+func errText(err error) string {
+	if err == nil {
+		return ""
+	}
+	return err.Error()
 }
 
 func (c *Client) handleEvent(evt any) {
@@ -199,9 +354,10 @@ func (c *Client) handleEvent(evt any) {
 		c.setStatus(StatusDisconnected)
 		c.opts.Log.Warn("whatsapp desconectado")
 	case *events.LoggedOut:
+		c.stopPairing()
 		c.qr.Store("")
 		c.setStatus(StatusLoggedOut)
-		c.opts.Log.Warn("sesión de whatsapp cerrada", "on_connect", v.OnConnect)
+		c.opts.Log.Warn("sesión de whatsapp cerrada; vincula el dispositivo de nuevo desde el panel", "on_connect", v.OnConnect)
 	case *events.Message:
 		c.emit(v)
 	}
@@ -266,7 +422,8 @@ func (c *Client) storeMedia(id string, msg *waE2E.Message) {
 
 // DownloadMedia descarga el contenido de un mensaje multimedia por su ID.
 func (c *Client) DownloadMedia(ctx context.Context, messageID string) ([]byte, error) {
-	if c.wa == nil {
+	wa := c.current()
+	if wa == nil {
 		return nil, ErrNotConnected
 	}
 	c.mediaMu.Lock()
@@ -275,7 +432,7 @@ func (c *Client) DownloadMedia(ctx context.Context, messageID string) ([]byte, e
 	if msg == nil {
 		return nil, fmt.Errorf("whatsapp: media no disponible para %q", messageID)
 	}
-	data, err := c.wa.DownloadAny(ctx, msg)
+	data, err := wa.DownloadAny(ctx, msg)
 	if err != nil {
 		return nil, fmt.Errorf("whatsapp: descargar media: %w", err)
 	}
@@ -284,14 +441,15 @@ func (c *Client) DownloadMedia(ctx context.Context, messageID string) ([]byte, e
 
 // SendText envía un mensaje de texto y devuelve su ID.
 func (c *Client) SendText(ctx context.Context, to, text string) (string, error) {
-	if c.wa == nil {
+	wa := c.current()
+	if wa == nil {
 		return "", ErrNotConnected
 	}
 	jid, err := types.ParseJID(to)
 	if err != nil {
 		return "", fmt.Errorf("whatsapp: jid inválido %q: %w", to, err)
 	}
-	resp, err := c.wa.SendMessage(ctx, jid, &waE2E.Message{Conversation: proto.String(text)})
+	resp, err := wa.SendMessage(ctx, jid, &waE2E.Message{Conversation: proto.String(text)})
 	if err != nil {
 		return "", fmt.Errorf("whatsapp: enviar texto: %w", err)
 	}
@@ -300,7 +458,8 @@ func (c *Client) SendText(ctx context.Context, to, text string) (string, error) 
 
 // SendMedia envía una imagen o documento y devuelve su ID.
 func (c *Client) SendMedia(ctx context.Context, to string, media OutboundMedia) (string, error) {
-	if c.wa == nil {
+	wa := c.current()
+	if wa == nil {
 		return "", ErrNotConnected
 	}
 	jid, err := types.ParseJID(to)
@@ -312,7 +471,7 @@ func (c *Client) SendMedia(ctx context.Context, to string, media OutboundMedia) 
 	if media.IsImage {
 		kind = whatsmeow.MediaImage
 	}
-	up, err := c.wa.Upload(ctx, media.Data, kind)
+	up, err := wa.Upload(ctx, media.Data, kind)
 	if err != nil {
 		return "", fmt.Errorf("whatsapp: subir media: %w", err)
 	}
@@ -344,7 +503,7 @@ func (c *Client) SendMedia(ctx context.Context, to string, media OutboundMedia) 
 		}}
 	}
 
-	resp, err := c.wa.SendMessage(ctx, jid, msg)
+	resp, err := wa.SendMessage(ctx, jid, msg)
 	if err != nil {
 		return "", fmt.Errorf("whatsapp: enviar media: %w", err)
 	}
@@ -353,7 +512,8 @@ func (c *Client) SendMedia(ctx context.Context, to string, media OutboundMedia) 
 
 // SendLocation envía una ubicación y devuelve el ID del mensaje.
 func (c *Client) SendLocation(ctx context.Context, to string, lat, lng float64, name, address string) (string, error) {
-	if c.wa == nil {
+	wa := c.current()
+	if wa == nil {
 		return "", ErrNotConnected
 	}
 	jid, err := types.ParseJID(to)
@@ -366,7 +526,7 @@ func (c *Client) SendLocation(ctx context.Context, to string, lat, lng float64, 
 		Name:             proto.String(name),
 		Address:          proto.String(address),
 	}}
-	resp, err := c.wa.SendMessage(ctx, jid, msg)
+	resp, err := wa.SendMessage(ctx, jid, msg)
 	if err != nil {
 		return "", fmt.Errorf("whatsapp: enviar ubicación: %w", err)
 	}
@@ -375,10 +535,11 @@ func (c *Client) SendLocation(ctx context.Context, to string, lat, lng float64, 
 
 // ListContacts devuelve todos los contactos conocidos.
 func (c *Client) ListContacts(ctx context.Context) ([]Contact, error) {
-	if c.wa == nil {
+	wa := c.current()
+	if wa == nil {
 		return nil, ErrNotConnected
 	}
-	all, err := c.wa.Store.Contacts.GetAllContacts(ctx)
+	all, err := wa.Store.Contacts.GetAllContacts(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("whatsapp: listar contactos: %w", err)
 	}
@@ -396,7 +557,8 @@ func (c *Client) ListContacts(ctx context.Context) ([]Contact, error) {
 
 // MarkSeen marca un mensaje como leído.
 func (c *Client) MarkSeen(ctx context.Context, chat, sender, messageID string) error {
-	if c.wa == nil {
+	wa := c.current()
+	if wa == nil {
 		return ErrNotConnected
 	}
 	chatJID, err := types.ParseJID(chat)
@@ -407,7 +569,7 @@ func (c *Client) MarkSeen(ctx context.Context, chat, sender, messageID string) e
 	if err != nil {
 		return fmt.Errorf("whatsapp: sender inválido %q: %w", sender, err)
 	}
-	if err := c.wa.MarkRead(ctx, []types.MessageID{types.MessageID(messageID)}, time.Now(), chatJID, senderJID); err != nil {
+	if err := wa.MarkRead(ctx, []types.MessageID{types.MessageID(messageID)}, time.Now(), chatJID, senderJID); err != nil {
 		return fmt.Errorf("whatsapp: marcar leído: %w", err)
 	}
 	return nil
@@ -415,7 +577,8 @@ func (c *Client) MarkSeen(ctx context.Context, chat, sender, messageID string) e
 
 // SendTyping envía el estado "escribiendo" o "pausado".
 func (c *Client) SendTyping(ctx context.Context, chat string, composing bool) error {
-	if c.wa == nil {
+	wa := c.current()
+	if wa == nil {
 		return ErrNotConnected
 	}
 	jid, err := types.ParseJID(chat)
@@ -426,7 +589,7 @@ func (c *Client) SendTyping(ctx context.Context, chat string, composing bool) er
 	if composing {
 		state = types.ChatPresenceComposing
 	}
-	if err := c.wa.SendChatPresence(ctx, jid, state, types.ChatPresenceMediaText); err != nil {
+	if err := wa.SendChatPresence(ctx, jid, state, types.ChatPresenceMediaText); err != nil {
 		return fmt.Errorf("whatsapp: enviar presencia: %w", err)
 	}
 	return nil
@@ -434,14 +597,15 @@ func (c *Client) SendTyping(ctx context.Context, chat string, composing bool) er
 
 // GetContact devuelve la información de contacto de un JID.
 func (c *Client) GetContact(ctx context.Context, jid string) (Contact, error) {
-	if c.wa == nil {
+	wa := c.current()
+	if wa == nil {
 		return Contact{}, ErrNotConnected
 	}
 	parsed, err := types.ParseJID(jid)
 	if err != nil {
 		return Contact{}, fmt.Errorf("whatsapp: jid inválido %q: %w", jid, err)
 	}
-	info, err := c.wa.Store.Contacts.GetContact(ctx, parsed)
+	info, err := wa.Store.Contacts.GetContact(ctx, parsed)
 	if err != nil {
 		return Contact{}, fmt.Errorf("whatsapp: obtener contacto: %w", err)
 	}
@@ -455,10 +619,13 @@ func (c *Client) GetContact(ctx context.Context, jid string) (Contact, error) {
 
 // Logout cierra la sesión (requiere reescanear QR).
 func (c *Client) Logout(ctx context.Context) error {
-	if c.wa == nil {
+	wa := c.current()
+	if wa == nil {
 		return ErrNotConnected
 	}
-	if err := c.wa.Logout(ctx); err != nil {
+	c.stopPairing()
+	c.qr.Store("")
+	if err := wa.Logout(ctx); err != nil {
 		return fmt.Errorf("whatsapp: logout: %w", err)
 	}
 	c.setStatus(StatusLoggedOut)

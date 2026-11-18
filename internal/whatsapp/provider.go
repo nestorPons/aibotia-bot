@@ -68,4 +68,7 @@ type Provider interface {
 	GetContact(ctx context.Context, jid string) (Contact, error)
 	ListContacts(ctx context.Context) ([]Contact, error)
 	Logout(ctx context.Context) error
+	// Reconnect reinicia la conexión: reconecta si hay sesión o vuelve a
+	// generar un QR de emparejamiento si no la hay.
+	Reconnect(ctx context.Context) error
 }

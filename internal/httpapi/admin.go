@@ -246,6 +246,7 @@ func (h *adminHandlers) mount(r chi.Router) {
 
 			api.Get("/whatsapp", h.whatsappStatus)
 			api.Get("/whatsapp/qr.png", h.whatsappQR)
+			api.Post("/whatsapp/reconnect", h.whatsappReconnect)
 		})
 	})
 }
@@ -998,6 +999,23 @@ func (h *adminHandlers) whatsappStatus(w http.ResponseWriter, _ *http.Request) {
 		"qr_available": h.wa.QRCode() != "",
 		"paired":       st == whatsapp.StatusConnected,
 	})
+}
+
+// whatsappReconnect reinicia el canal y, si no hay sesión, genera un QR nuevo.
+func (h *adminHandlers) whatsappReconnect(w http.ResponseWriter, r *http.Request) {
+	if h.wa == nil {
+		writeError(w, http.StatusServiceUnavailable, "whatsapp_disabled", "WhatsApp no está habilitado")
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 25*time.Second)
+	defer cancel()
+
+	if err := h.wa.Reconnect(ctx); err != nil {
+		h.fail(w, "reconnect_failed", "No se pudo reiniciar la conexión de WhatsApp", err)
+		return
+	}
+	h.log.Info("whatsapp: reconexión solicitada desde el panel")
+	h.whatsappStatus(w, r)
 }
 
 func (h *adminHandlers) whatsappQR(w http.ResponseWriter, _ *http.Request) {
